@@ -53,7 +53,14 @@ public/media/  fotos (webp), panorámicas 360° y video
 - **Formularios:** validan pero no envían datos. Conectar a CRM o correo en producción.
 - **Mapa:** ilustrado, con posiciones aproximadas. Para producción se recomienda MapLibre con teselas reales.
 - **Tour 360° y video:** material libre de ejemplo (ver `CREDITS.md`).
-- **Español:** el selector ES muestra un aviso; la traducción completa es para la siguiente fase.
+
+## Idiomas
+
+El sitio está completo en inglés y español (selector EN/ES en el encabezado y en el menú móvil). La primera visita abre en español si el navegador está en español; si no, en inglés. La elección se guarda en el navegador.
+
+- Textos de interfaz: en línea con `tx('English', 'Español')` (`src/lib/i18n.tsx`).
+- Datos: `company.ts` usa `{ en, es }`; las propiedades se traducen en `src/data/properties.es.ts`.
+- El buscador entiende ambos idiomas y responde en el idioma activo.
 
 ## Para producción
 

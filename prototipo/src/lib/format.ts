@@ -20,7 +20,7 @@ export const m2 = (v: number) => `${num.format(v)} m²`;
 export const pct = (v: number, digits = 1) => `${(v * 100).toFixed(digits)}%`;
 export const int = (v: number) => num.format(Math.round(v));
 
-export function formatDate(iso: string): string {
+export function formatDate(iso: string, lang: 'en' | 'es' = 'en'): string {
   const d = new Date(iso + 'T12:00:00');
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return d.toLocaleDateString(lang === 'es' ? 'es-CR' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }

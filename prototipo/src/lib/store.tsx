@@ -12,8 +12,8 @@ type Store = {
   toggleSaved: (slug: string) => boolean;
   filters: Filters;
   setFilters: (f: Filters) => void;
+  /** Free-text query from the smart search; its "understood" chips are derived per language. */
   query: string;
-  understood: string[];
   runQuery: (q: string) => void;
   clearQuery: () => void;
   sort: Sort;
@@ -41,7 +41,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [saved, setSaved] = useState<string[]>(() => load('sicr.saved', []));
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [query, setQuery] = useState('');
-  const [understood, setUnderstood] = useState<string[]>([]);
   const [sort, setSort] = useState<Sort>('featured');
   const [toast, setToast] = useState<string | null>(null);
   const timer = useRef<number | undefined>(undefined);
@@ -62,23 +61,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [saved]);
 
   const runQuery = useCallback((q: string) => {
-    const { filters: f, understood: u } = parseQuery(q);
+    const { filters: f } = parseQuery(q);
     setQuery(q);
-    setUnderstood(u);
     setFilters(f);
     setSort(f.investment ? 'yield' : 'featured');
   }, []);
 
   const clearQuery = useCallback(() => {
     setQuery('');
-    setUnderstood([]);
     setFilters(emptyFilters);
   }, []);
 
   const value = useMemo<Store>(() => ({
     currency, setCurrency: setCurrencyState, rate: company.exchangeRate,
-    saved, toggleSaved, filters, setFilters, query, understood, runQuery, clearQuery, sort, setSort, toast, notify,
-  }), [currency, saved, toggleSaved, filters, query, understood, runQuery, clearQuery, sort, toast, notify]);
+    saved, toggleSaved, filters, setFilters, query, runQuery, clearQuery, sort, setSort, toast, notify,
+  }), [currency, saved, toggleSaved, filters, query, runQuery, clearQuery, sort, toast, notify]);
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;
 }

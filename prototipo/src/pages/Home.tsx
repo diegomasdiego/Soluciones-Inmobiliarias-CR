@@ -4,6 +4,7 @@ import { company, equipment, testimonials, zones, type Zone } from '../data/comp
 import { bySlug, properties, RESIDENCY_MIN_USD } from '../data/properties';
 import { closingCosts, sum, yearlyHolding } from '../lib/costs';
 import { money } from '../lib/format';
+import { pick, useLang } from '../lib/i18n';
 import { mediaUrl } from '../lib/media';
 import { Link, useRouter } from '../lib/router';
 import { useStore } from '../lib/store';
@@ -21,6 +22,7 @@ const heroTopo: TopoCenter[] = [{ x: 0.82, y: 0.35, rings: 24, spacing: 28, seed
 const zoneTopo: TopoCenter[] = [{ x: 0.7, y: 0.6, rings: 16, spacing: 34, seed: 1.6 }];
 
 function Hero() {
+  const { tx, lang } = useLang();
   const ref = useRef<HTMLElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(true);
@@ -39,7 +41,7 @@ function Hero() {
   };
 
   return (
-    <section className="hero" ref={ref} aria-label="Introduction">
+    <section className="hero" ref={ref} aria-label={tx('Introduction', 'Introducción')}>
       <motion.div className="hero-media" style={{ y, scale }}>
         <video ref={video} muted playsInline loop autoPlay preload="auto" poster={mediaUrl('hero-poster')}>
           <source src={mediaUrl('heroVideo')} type="video/mp4" />
@@ -49,22 +51,34 @@ function Hero() {
       <Topo className="hero-topo" centers={heroTopo} color="rgba(232,238,232,.18)" animate speed={0.8} />
       <motion.div className="wrap hero-content" style={{ opacity: fade }}>
         <motion.p className="eyebrow eyebrow-light" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.8 }}>
-          Real estate · Land &amp; Build · Central Valley, Costa Rica
+          {tx('Real estate · Land & Build · Central Valley, Costa Rica', 'Bienes raíces · Land & Build · Valle Central, Costa Rica')}
         </motion.p>
-        <h1 className="hero-title">
-          <span className="line"><motion.span initial={{ y: '108%' }} animate={{ y: 0 }} transition={{ delay: 0.2, duration: 1.1, ease }}>Solid <em>ground</em></motion.span></span>{' '}
-          <span className="line"><motion.span initial={{ y: '108%' }} animate={{ y: 0 }} transition={{ delay: 0.34, duration: 1.1, ease }}>in Costa Rica.</motion.span></span>
+        <h1 className="hero-title" key={lang}>
+          {lang === 'es' ? (
+            <>
+              <span className="line"><motion.span initial={{ y: '108%' }} animate={{ y: 0 }} transition={{ delay: 0.2, duration: 1.1, ease }}>Terreno <em>firme</em></motion.span></span>{' '}
+              <span className="line"><motion.span initial={{ y: '108%' }} animate={{ y: 0 }} transition={{ delay: 0.34, duration: 1.1, ease }}>en Costa Rica.</motion.span></span>
+            </>
+          ) : (
+            <>
+              <span className="line"><motion.span initial={{ y: '108%' }} animate={{ y: 0 }} transition={{ delay: 0.2, duration: 1.1, ease }}>Solid <em>ground</em></motion.span></span>{' '}
+              <span className="line"><motion.span initial={{ y: '108%' }} animate={{ y: 0 }} transition={{ delay: 0.34, duration: 1.1, ease }}>in Costa Rica.</motion.span></span>
+            </>
+          )}
         </h1>
         <motion.p className="hero-lead" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.9 }}>
-          Verified homes, lots and farms in Escazú, Santa Ana, Heredia and Alajuela — and the machines to prepare your land.
+          {tx(
+            'Verified homes, lots and farms in Escazú, Santa Ana, Heredia and Alajuela — and the machines to prepare your land.',
+            'Casas, lotes y fincas verificados en Escazú, Santa Ana, Heredia y Alajuela, y la maquinaria para preparar su terreno.',
+          )}
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75, duration: 0.9 }}>
           <AISearch variant="hero" />
         </motion.div>
       </motion.div>
       <div className="wrap hero-foot">
-        <span className="mono">10.0294° N · 84.1970° W — Alajuela highlands, looking over the valley</span>
-        <button type="button" className="hero-pause" onClick={toggle} aria-label={playing ? 'Pause background video' : 'Play background video'}>
+        <span className="mono">{tx('10.0294° N · 84.1970° W — Alajuela highlands, looking over the valley', '10.0294° N · 84.1970° O — Altos de Alajuela, con vista al valle')}</span>
+        <button type="button" className="hero-pause" onClick={toggle} aria-label={playing ? tx('Pause background video', 'Pausar el video de fondo') : tx('Play background video', 'Reproducir el video de fondo')}>
           {playing ? <IconPause size={16} /> : <IconPlay size={16} />}
         </button>
       </div>
@@ -73,13 +87,14 @@ function Hero() {
 }
 
 function Stats() {
+  const { lang, tx } = useLang();
   return (
-    <section className="stats" aria-label="Company at a glance">
+    <section className="stats" aria-label={tx('Company at a glance', 'La empresa en cifras')}>
       <div className="wrap stats-grid">
         {company.stats.map((s, i) => (
-          <Reveal key={s.label} delay={i * 0.08} className="stat">
-            <span className="stat-value">{s.value}{s.unit && <small> {s.unit}</small>}</span>
-            <span className="stat-label">{s.label}</span>
+          <Reveal key={i} delay={i * 0.08} className="stat">
+            <span className="stat-value">{s.value}{s.unit.en && <small> {pick(s.unit, lang)}</small>}</span>
+            <span className="stat-label">{pick(s.label, lang)}</span>
           </Reveal>
         ))}
       </div>
@@ -88,16 +103,17 @@ function Stats() {
 }
 
 function Featured() {
+  const { tx } = useLang();
   const featured = ['los-laureles', 'altos-de-pozos', 'guachipelin-residences'].map(s => bySlug(s)!);
   return (
     <section className="section featured">
       <div className="wrap">
         <div className="section-head row">
           <div>
-            <p className="eyebrow">Handpicked this month</p>
-            <h2 className="h2">Homes we would buy ourselves</h2>
+            <p className="eyebrow">{tx('Handpicked this month', 'Seleccionadas este mes')}</p>
+            <h2 className="h2">{tx('Homes we would buy ourselves', 'Casas que compraríamos nosotros mismos')}</h2>
           </div>
-          <Link to={{ name: 'search' }} className="link-btn">See all {properties.length} properties <IconArrow size={18} /></Link>
+          <Link to={{ name: 'search' }} className="link-btn">{tx(`See all ${properties.length} properties`, `Ver las ${properties.length} propiedades`)} <IconArrow size={18} /></Link>
         </div>
         <div className="card-grid">
           {featured.map((p, i) => (
@@ -110,48 +126,51 @@ function Featured() {
 }
 
 function ZoneStep({ z, onActive, count }: { z: Zone; onActive: () => void; count: number }) {
+  const { lang, tx } = useLang();
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: '-45% 0px -45% 0px' });
   const { runQuery } = useStore();
   const { navigate } = useRouter();
+  const name = pick(z.name, lang);
   useEffect(() => { if (inView) onActive(); }, [inView, onActive]);
   return (
     <div ref={ref} className={`zone-step ${inView ? 'is-active' : ''}`}>
-      <div className="zone-step-mobile"><Img name={z.photo} alt={z.name} /></div>
-      <p className="eyebrow">{z.lat.toFixed(4)}° N · {Math.abs(z.lng).toFixed(4)}° W</p>
-      <h3 className="zone-name">{z.name}</h3>
-      <p className="zone-tagline">{z.tagline}</p>
-      <p className="zone-body">{z.body}</p>
+      <div className="zone-step-mobile"><Img name={z.photo} alt={name} /></div>
+      <p className="eyebrow">{z.lat.toFixed(4)}° N · {Math.abs(z.lng).toFixed(4)}° {tx('W', 'O')}</p>
+      <h3 className="zone-name">{name}</h3>
+      <p className="zone-tagline">{pick(z.tagline, lang)}</p>
+      <p className="zone-body">{pick(z.body, lang)}</p>
       <dl className="zone-stats">
-        <div><dt>Price per m² built</dt><dd>{z.pricePerM2}{z.estimate && <sup>*</sup>}</dd></div>
-        <div><dt>Appreciation</dt><dd>{z.growth}</dd></div>
-        <div><dt>To SJO airport</dt><dd>{z.toAirport}</dd></div>
-        <div><dt>Listings now</dt><dd>{count}</dd></div>
+        <div><dt>{tx('Price per m² built', 'Precio por m² construido')}</dt><dd>{z.pricePerM2}{z.estimate && <sup>*</sup>}</dd></div>
+        <div><dt>{tx('Appreciation', 'Plusvalía')}</dt><dd>{pick(z.growth, lang)}</dd></div>
+        <div><dt>{tx('To SJO airport', 'Al aeropuerto SJO')}</dt><dd>{z.toAirport}</dd></div>
+        <div><dt>{tx('Listings now', 'Propiedades hoy')}</dt><dd>{count}</dd></div>
       </dl>
-      {z.estimate && <p className="fine">* Estimate. Other ranges from 2026 market data.</p>}
-      <button type="button" className="link-btn" onClick={() => { runQuery(z.name); navigate({ name: 'search' }); }}>
-        Browse {z.name} <IconArrow size={18} />
+      {z.estimate && <p className="fine">{tx('* Estimate. Other ranges from 2026 market data.', '* Estimación. Los demás rangos provienen de datos de mercado de 2026.')}</p>}
+      <button type="button" className="link-btn" onClick={() => { runQuery(name); navigate({ name: 'search' }); }}>
+        {tx(`Browse ${name}`, `Ver ${name}`)} <IconArrow size={18} />
       </button>
     </div>
   );
 }
 
 function Zones() {
+  const { lang, tx } = useLang();
   const [active, setActive] = useState(0);
   const setters = useRef(zones.map((_, i) => () => setActive(i))).current;
   return (
-    <section className="zones" aria-label="Where we work">
+    <section className="zones" aria-label={tx('Where we work', 'Dónde trabajamos')}>
       <div className="wrap">
         <div className="section-head">
-          <p className="eyebrow">Where we work</p>
-          <h2 className="h2">Four valleys, one team that knows every road</h2>
+          <p className="eyebrow">{tx('Where we work', 'Dónde trabajamos')}</p>
+          <h2 className="h2">{tx('Four valleys, one team that knows every road', 'Cuatro valles, un equipo que conoce cada camino')}</h2>
         </div>
       </div>
       <div className="wrap zones-grid">
         <div className="zones-sticky">
           <div className="zones-visual">
             {zones.map((z, i) => (
-              <motion.div key={z.name} className="zones-img" initial={false} animate={{ opacity: i === active ? 1 : 0, scale: i === active ? 1 : 1.08 }} transition={{ duration: 1.1, ease }}>
+              <motion.div key={z.photo} className="zones-img" initial={false} animate={{ opacity: i === active ? 1 : 0, scale: i === active ? 1 : 1.08 }} transition={{ duration: 1.1, ease }}>
                 <Img name={z.photo} alt="" />
               </motion.div>
             ))}
@@ -159,8 +178,8 @@ function Zones() {
             <Topo className="zones-topo" centers={zoneTopo} color="rgba(255,255,255,.3)" phase={active * 1.6} />
             <div className="zones-caption">
               <AnimatePresence mode="wait">
-                <motion.span key={active} className="zones-caption-name" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -30, opacity: 0 }} transition={{ duration: 0.5, ease }}>
-                  {zones[active].name}
+                <motion.span key={`${lang}-${active}`} className="zones-caption-name" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -30, opacity: 0 }} transition={{ duration: 0.5, ease }}>
+                  {pick(zones[active].name, lang)}
                 </motion.span>
               </AnimatePresence>
               <div className="zones-dots" aria-hidden="true">{zones.map((_, i) => <span key={i} className={i === active ? 'on' : ''} />)}</div>
@@ -169,7 +188,7 @@ function Zones() {
         </div>
         <div className="zones-steps">
           {zones.map((z, i) => (
-            <ZoneStep key={z.name} z={z} onActive={setters[i]} count={properties.filter(p => z.area.includes(p.area)).length} />
+            <ZoneStep key={z.photo} z={z} onActive={setters[i]} count={properties.filter(p => z.area.includes(p.area)).length} />
           ))}
         </div>
       </div>
@@ -178,24 +197,35 @@ function Zones() {
 }
 
 function Verified() {
+  const { tx } = useLang();
   const p = bySlug('los-laureles')!;
+  const checks = [
+    tx('Title (Folio Real) and owner confirmed at the Registro Nacional', 'Folio real y propietario confirmados en el Registro Nacional'),
+    tx('Cadastral plan matched to the land on the ground', 'Plano catastrado comparado con el terreno en sitio'),
+    tx('Liens, annotations and lawsuits ruled out', 'Sin gravámenes, anotaciones ni litigios'),
+    tx('Municipal taxes up to date', 'Impuestos municipales al día'),
+    tx('Closing through a SUGEF-regulated escrow agent', 'Cierre con un agente escrow regulado por SUGEF'),
+  ];
   return (
     <section className="section verified-sec">
       <div className="wrap verified-grid">
         <div className="verified-copy">
           <p className="eyebrow">Solid Ground Verified</p>
-          <h2 className="h2">Costa Rica doesn’t license brokers. So we show our work.</h2>
-          <p className="lead">Anyone can list a property here. Before we list one, we pull the registry, match the cadastral plan to the land and confirm there are no liens — and we put what we checked, and when, on every listing.</p>
+          <h2 className="h2">{tx('Costa Rica doesn’t license brokers. So we show our work.', 'En Costa Rica no se exige licencia para ser corredor. Por eso mostramos lo que revisamos.')}</h2>
+          <p className="lead">{tx(
+            'Anyone can list a property here. Before we list one, we pull the registry, match the cadastral plan to the land and confirm there are no liens — and we put what we checked, and when, on every listing.',
+            'Aquí cualquiera puede anunciar una propiedad. Antes de publicar una, consultamos el Registro, comparamos el plano catastrado con el terreno y confirmamos que no tenga gravámenes. Y en cada ficha mostramos qué revisamos y cuándo.',
+          )}</p>
           <ul className="check-list">
-            {['Title (Folio Real) and owner confirmed at the Registro Nacional', 'Cadastral plan matched to the land on the ground', 'Liens, annotations and lawsuits ruled out', 'Municipal taxes up to date', 'Closing through a SUGEF-regulated escrow agent'].map((t, i) => (
-              <Reveal as="li" key={t} delay={i * 0.06}><span className="check"><IconCheck size={14} /></span>{t}</Reveal>
+            {checks.map((t, i) => (
+              <Reveal as="li" key={i} delay={i * 0.06}><span className="check"><IconCheck size={14} /></span>{t}</Reveal>
             ))}
           </ul>
         </div>
         <Reveal className="verified-visual">
-          <Img name="laureles-2" alt="Casa Los Laureles, exterior" />
+          <Img name="laureles-2" alt={tx('Casa Los Laureles, exterior', 'Casa Los Laureles, exterior')} />
           <div className="verified-float"><VerifiedPanel p={p} /></div>
-          <span className="verified-stamp mono">Folio real {p.legal.folio}</span>
+          <span className="verified-stamp mono">{tx('Folio real', 'Folio real')} {p.legal.folio}</span>
         </Reveal>
       </div>
     </section>
@@ -203,32 +233,37 @@ function Verified() {
 }
 
 function CostTeaser() {
+  const { lang, tx } = useLang();
   const [price, setPrice] = useState(350000);
   const { currency, rate, runQuery } = useStore();
   const { navigate } = useRouter();
-  const closing = sum(closingCosts(price, { residency: price >= RESIDENCY_MIN_USD, split: false }));
+  const closing = sum(closingCosts(price, { residency: price >= RESIDENCY_MIN_USD, split: false }, lang));
   const { propertyTax } = yearlyHolding(price);
   const eligible = price >= RESIDENCY_MIN_USD;
   return (
     <section className="section cost-teaser">
       <div className="wrap cost-grid">
         <Reveal className="residency-card">
-          <p className="eyebrow">Law 9996</p>
-          <h3 className="h3">$150,000 in property can open the door to residency.</h3>
-          <p>Investor residency starts at $150,000, and most of our listings are above it. Look for the <span className="badge badge-residency">Residency-eligible</span> tag.</p>
-          <button type="button" className="btn btn-ghost" onClick={() => { runQuery('residency'); navigate({ name: 'search' }); }}>See eligible homes <IconArrow size={18} /></button>
+          <p className="eyebrow">{tx('Law 9996', 'Ley 9996')}</p>
+          <h3 className="h3">{tx('$150,000 in property can open the door to residency.', 'Una propiedad de $150.000 puede abrirle la puerta a la residencia.')}</h3>
+          <p>
+            {tx('Investor residency starts at $150,000, and most of our listings are above it. Look for the ', 'La residencia como inversionista empieza en $150.000, y la mayoría de nuestras propiedades supera ese monto. Busque la etiqueta ')}
+            <span className="badge badge-residency">{tx('Residency-eligible', 'Apta para residencia')}</span>
+            {tx(' tag.', '.')}
+          </p>
+          <button type="button" className="btn btn-ghost" onClick={() => { runQuery('residency'); navigate({ name: 'search' }); }}>{tx('See eligible homes', 'Ver propiedades aptas')} <IconArrow size={18} /></button>
         </Reveal>
         <Reveal className="truecost-card" delay={0.1}>
-          <p className="eyebrow">True cost</p>
-          <h3 className="h3">What will it really cost to buy?</h3>
-          <label htmlFor="teaser-price" className="range-label">Purchase price <Price usd={price} /></label>
+          <p className="eyebrow">{tx('True cost', 'Costo real')}</p>
+          <h3 className="h3">{tx('What will it really cost to buy?', '¿Cuánto cuesta realmente comprar?')}</h3>
+          <label htmlFor="teaser-price" className="range-label">{tx('Purchase price', 'Precio de compra')} <Price usd={price} /></label>
           <input id="teaser-price" type="range" min={100000} max={600000} step={5000} value={price} onChange={e => setPrice(+e.target.value)} />
           <dl className="teaser-out">
-            <div><dt>Closing costs (est.)</dt><dd>{money(closing, currency, rate)}</dd></div>
-            <div><dt>Property tax a year</dt><dd>{money(propertyTax, currency, rate)}</dd></div>
-            <div><dt>Investor residency</dt><dd className={eligible ? 'ok' : 'no'}>{eligible ? 'Eligible' : 'Below $150k'}</dd></div>
+            <div><dt>{tx('Closing costs (est.)', 'Gastos de cierre (est.)')}</dt><dd>{money(closing, currency, rate)}</dd></div>
+            <div><dt>{tx('Property tax a year', 'Impuesto de bienes inmuebles al año')}</dt><dd>{money(propertyTax, currency, rate)}</dd></div>
+            <div><dt>{tx('Investor residency', 'Residencia de inversionista')}</dt><dd className={eligible ? 'ok' : 'no'}>{eligible ? tx('Eligible', 'Califica') : tx('Below $150k', 'Menos de $150k')}</dd></div>
           </dl>
-          <Link to={{ name: 'calculator' }} className="link-btn">Open the full calculator <IconArrow size={18} /></Link>
+          <Link to={{ name: 'calculator' }} className="link-btn">{tx('Open the full calculator', 'Abrir la calculadora completa')} <IconArrow size={18} /></Link>
         </Reveal>
       </div>
     </section>
@@ -236,6 +271,7 @@ function CostTeaser() {
 }
 
 function BuildTeaser() {
+  const { lang, tx } = useLang();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
   const y = useTransform(scrollYProgress, [0, 1], ['-12%', '12%']);
@@ -246,28 +282,32 @@ function BuildTeaser() {
       <div className="wrap build-teaser-inner">
         <Reveal>
           <p className="eyebrow eyebrow-light">Land &amp; Build</p>
-          <h2 className="h2 light">Buy the lot.<br />We’ll prepare the ground.</h2>
-          <p className="lead light">Our own excavators, dump trucks and compactors clear, terrace and drain your land — so the lot you buy from us is ready for your builder.</p>
+          <h2 className="h2 light">{lang === 'es' ? <>Compre el lote.<br />Nosotros preparamos el terreno.</> : <>Buy the lot.<br />We’ll prepare the ground.</>}</h2>
+          <p className="lead light">{tx(
+            'Our own excavators, dump trucks and compactors clear, terrace and drain your land — so the lot you buy from us is ready for your builder.',
+            'Nuestras propias excavadoras, vagonetas y compactadoras limpian, hacen terrazas y drenan su terreno, para que el lote que nos compra quede listo para su constructor.',
+          )}</p>
         </Reveal>
         <ul className="machine-chips">
-          {equipment.map((e, i) => <Reveal as="li" key={e.id} delay={0.05 * i}>{e.name}</Reveal>)}
+          {equipment.map((e, i) => <Reveal as="li" key={e.id} delay={0.05 * i}>{pick(e.name, lang)}</Reveal>)}
         </ul>
-        <Link to={{ name: 'build' }} className="btn btn-light">Explore Land &amp; Build <IconArrow size={18} /></Link>
+        <Link to={{ name: 'build' }} className="btn btn-light">{tx('Explore Land & Build', 'Conocer Land & Build')} <IconArrow size={18} /></Link>
       </div>
     </section>
   );
 }
 
 function Testimonials() {
+  const { lang, tx } = useLang();
   return (
     <section className="section testimonials">
       <div className="wrap">
-        <p className="eyebrow">From our clients</p>
+        <p className="eyebrow">{tx('From our clients', 'Lo que dicen nuestros clientes')}</p>
         <div className="quotes">
           {testimonials.map((t, i) => (
             <Reveal key={t.name} delay={i * 0.1} className="quote">
-              <blockquote>“{t.quote}”</blockquote>
-              <p><strong>{t.name}</strong><span>{t.detail}</span></p>
+              <blockquote>“{pick(t.quote, lang)}”</blockquote>
+              <p><strong>{t.name}</strong><span>{pick(t.detail, lang)}</span></p>
             </Reveal>
           ))}
         </div>
@@ -277,16 +317,20 @@ function Testimonials() {
 }
 
 function Cta() {
+  const { lang, tx } = useLang();
   return (
     <section className="section cta">
       <div className="wrap cta-grid">
         <div>
-          <p className="eyebrow">Start here</p>
-          <h2 className="h2">Tell us what you’re looking for.</h2>
-          <p className="lead">An advisor replies within one business day with options that match — including ones not yet online.</p>
-          <p className="cta-meta mono">{company.hours}</p>
+          <p className="eyebrow">{tx('Start here', 'Empiece aquí')}</p>
+          <h2 className="h2">{tx('Tell us what you’re looking for.', 'Cuéntenos qué está buscando.')}</h2>
+          <p className="lead">{tx(
+            'An advisor replies within one business day with options that match — including ones not yet online.',
+            'Un asesor le responde en menos de un día hábil con opciones a su medida, incluso algunas que todavía no están publicadas.',
+          )}</p>
+          <p className="cta-meta mono">{pick(company.hours, lang)}</p>
         </div>
-        <ContactForm compact submitLabel="Send" />
+        <ContactForm compact submitLabel={tx('Send', 'Enviar')} />
       </div>
     </section>
   );

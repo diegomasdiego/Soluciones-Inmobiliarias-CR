@@ -1,5 +1,6 @@
 // Lightweight 360° viewer: one WebGL fragment shader samples an equirectangular panorama.
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from 'react';
+import { useLang } from '../lib/i18n';
 import { mediaUrl } from '../lib/media';
 import { IconCube } from './Icons';
 
@@ -23,6 +24,7 @@ void main(){
 export type PanoRoom = { name: string; media: string; yaw?: number };
 
 export function Pano360({ rooms }: { rooms: PanoRoom[] }) {
+  const { tx } = useLang();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [room, setRoom] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'unsupported'>('loading');
@@ -122,7 +124,7 @@ export function Pano360({ rooms }: { rooms: PanoRoom[] }) {
 
   return (
     <div className="pano">
-      <div className="pano-stage" data-cursor="Drag">
+      <div className="pano-stage" data-cursor={tx('Drag', 'Arrastre')}>
         <canvas
           ref={canvasRef}
           className="pano-canvas"
@@ -130,17 +132,20 @@ export function Pano360({ rooms }: { rooms: PanoRoom[] }) {
           onKeyDown={onKey}
           tabIndex={0}
           role="img"
-          aria-label={`360° view of the ${rooms[room].name.toLowerCase()}. Drag or use the arrow keys to look around.`}
+          aria-label={tx(
+            `360° view: ${rooms[room].name}. Drag or use the arrow keys to look around.`,
+            `Vista 360°: ${rooms[room].name}. Arrastre o use las flechas del teclado para mirar alrededor.`,
+          )}
         />
-        {status === 'loading' && <div className="pano-status">Loading 360° view…</div>}
-        {status === 'unsupported' && <div className="pano-status">This browser can’t show the 360° tour.</div>}
-        {!interacted && status === 'ready' && <div className="pano-hint"><IconCube size={18} /> Drag to look around</div>}
+        {status === 'loading' && <div className="pano-status">{tx('Loading 360° view…', 'Cargando vista 360°…')}</div>}
+        {status === 'unsupported' && <div className="pano-status">{tx('This browser can’t show the 360° tour.', 'Este navegador no puede mostrar el recorrido 360°.')}</div>}
+        {!interacted && status === 'ready' && <div className="pano-hint"><IconCube size={18} /> {tx('Drag to look around', 'Arrastre para mirar alrededor')}</div>}
         <div className="pano-zoom">
-          <button type="button" onClick={() => zoom(-0.15)} aria-label="Zoom in">+</button>
-          <button type="button" onClick={() => zoom(0.15)} aria-label="Zoom out">−</button>
+          <button type="button" onClick={() => zoom(-0.15)} aria-label={tx('Zoom in', 'Acercar')}>+</button>
+          <button type="button" onClick={() => zoom(0.15)} aria-label={tx('Zoom out', 'Alejar')}>−</button>
         </div>
       </div>
-      <div className="pano-rooms" role="group" aria-label="Rooms">
+      <div className="pano-rooms" role="group" aria-label={tx('Rooms', 'Espacios')}>
         {rooms.map((r, i) => (
           <button key={r.name} type="button" aria-pressed={room === i} onClick={() => setRoom(i)}>{r.name}</button>
         ))}

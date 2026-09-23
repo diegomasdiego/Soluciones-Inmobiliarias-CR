@@ -1,5 +1,6 @@
 // Buyer-side cost model for Costa Rica, based on the 2026 regulations summarized in the client's
 // market report. Planning estimates only; a notary confirms the final figures.
+import type { Lang } from './i18n';
 
 export type ClosingOptions = { residency: boolean; split: boolean };
 export type CostLine = { label: string; note: string; value: number };
@@ -16,15 +17,20 @@ export const RATES = {
   dueDiligenceUsd: 350,
 };
 
-export function closingCosts(price: number, o: ClosingOptions): CostLine[] {
+export function closingCosts(price: number, o: ClosingOptions, lang: Lang = 'en'): CostLine[] {
+  const es = lang === 'es';
   const share = o.split ? 0.5 : 1;
   const transferRate = RATES.transfer * (o.residency ? 1 - RATES.residencyTransferDiscount : 1);
   return [
-    { label: 'Transfer tax', note: o.residency ? '1.5% less 20% (Law 9996)' : '1.5% of the price', value: price * transferRate * share },
-    { label: 'Registry fees and fiscal stamps', note: '≈0.5% of the price', value: price * RATES.registry * share },
-    { label: 'Notary fees', note: '≈1.25% + 13% VAT', value: price * RATES.notary * (1 + RATES.vat) },
-    { label: 'Escrow agent', note: 'SUGEF-regulated, flat fee', value: RATES.escrowUsd },
-    { label: 'Title study and due diligence', note: 'Registry, cadastre, liens', value: RATES.dueDiligenceUsd },
+    {
+      label: es ? 'Impuesto de traspaso' : 'Transfer tax',
+      note: o.residency ? (es ? '1,5% menos 20% (Ley 9996)' : '1.5% less 20% (Law 9996)') : (es ? '1,5% del precio' : '1.5% of the price'),
+      value: price * transferRate * share,
+    },
+    { label: es ? 'Derechos de registro y timbres' : 'Registry fees and fiscal stamps', note: es ? '≈0,5% del precio' : '≈0.5% of the price', value: price * RATES.registry * share },
+    { label: es ? 'Honorarios del notario' : 'Notary fees', note: es ? '≈1,25% + 13% de IVA' : '≈1.25% + 13% VAT', value: price * RATES.notary * (1 + RATES.vat) },
+    { label: es ? 'Agente escrow' : 'Escrow agent', note: es ? 'Regulado por SUGEF, tarifa fija' : 'SUGEF-regulated, flat fee', value: RATES.escrowUsd },
+    { label: es ? 'Estudio registral y debida diligencia' : 'Title study and due diligence', note: es ? 'Registro, catastro, gravámenes' : 'Registry, cadastre, liens', value: RATES.dueDiligenceUsd },
   ];
 }
 

@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from 'motion/react';
 import type { Property } from '../data/properties';
 import { moneyShort } from '../lib/format';
 import { useRouter } from '../lib/router';
+import { localize } from '../data/properties.es';
+import { useLang } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { Img, Price } from './Basics';
 import { IconArrow, IconClose, IconPlane } from './Icons';
@@ -52,8 +54,10 @@ type Props = {
 export function MapView({ items, active, onHover, mini, className }: Props) {
   const { currency, rate } = useStore();
   const { navigate } = useRouter();
+  const { lang, tx } = useLang();
   const [selected, setSelected] = useState<string | null>(null);
-  const sel = items.find(p => p.slug === selected);
+  const found = items.find(p => p.slug === selected);
+  const sel = found && localize(found, lang);
   const airport = project(9.9939, -84.2088);
 
   return (
@@ -75,7 +79,7 @@ export function MapView({ items, active, onHover, mini, className }: Props) {
         return <span key={pl.name} className={`map-place ${pl.big ? 'is-big' : ''}`} style={{ left: `${p.x}%`, top: `${p.y}%` }}>{pl.name}</span>;
       })}
       <span className="map-airport" style={{ left: `${airport.x}%`, top: `${airport.y}%` }}><IconPlane size={14} /> SJO</span>
-      <span className="map-north" aria-hidden="true">N ↑ · Poás 18 km</span>
+      <span className="map-north" aria-hidden="true">N ↑ · {tx('Poás volcano 15 km', 'Volcán Poás a 15 km')}</span>
 
       {items.map(p => {
         const pos = project(p.lat, p.lng);
@@ -107,18 +111,18 @@ export function MapView({ items, active, onHover, mini, className }: Props) {
             transition={{ type: 'spring', stiffness: 420, damping: 32 }}
             onClick={e => e.stopPropagation()}
           >
-            <button type="button" className="map-pop-close" aria-label="Close" onClick={() => setSelected(null)}><IconClose size={16} /></button>
+            <button type="button" className="map-pop-close" aria-label={tx('Close', 'Cerrar')} onClick={() => setSelected(null)}><IconClose size={16} /></button>
             <Img name={sel.photos[0]} alt={sel.title} />
             <div className="map-pop-body">
               <strong>{sel.title}</strong>
               <span>{sel.district}, {sel.canton}</span>
               <Price usd={sel.priceUsd} prefix={sel.priceNote} className="map-pop-price" />
-              <button type="button" className="link-btn" onClick={() => navigate({ name: 'property', slug: sel.slug })}>View property <IconArrow size={16} /></button>
+              <button type="button" className="link-btn" onClick={() => navigate({ name: 'property', slug: sel.slug })}>{tx('View property', 'Ver propiedad')} <IconArrow size={16} /></button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-      {!mini && <p className="map-note">Illustrated map · positions approximate</p>}
+      {!mini && <p className="map-note">{tx('Illustrated map · positions approximate', 'Mapa ilustrado · ubicaciones aproximadas')}</p>}
     </div>
   );
 }

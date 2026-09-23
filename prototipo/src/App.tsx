@@ -1,4 +1,5 @@
 import { MotionConfig } from 'motion/react';
+import { LangProvider, useLang } from './lib/i18n';
 import { RouterProvider, useRouter } from './lib/router';
 import { StoreProvider } from './lib/store';
 import { Cursor, Footer, Header, Toast } from './components/Chrome';
@@ -21,21 +22,32 @@ function Page() {
   }
 }
 
+function SkipLink() {
+  const { tx } = useLang();
+  return (
+    <a href="#main" className="skip-link" onClick={e => { e.preventDefault(); document.getElementById('main')?.focus(); }}>
+      {tx('Skip to content', 'Saltar al contenido')}
+    </a>
+  );
+}
+
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
-      <StoreProvider>
-        <RouterProvider>
-          <a href="#main" className="skip-link" onClick={e => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
-          <Header />
-          <main id="main" tabIndex={-1}>
-            <Page />
-          </main>
-          <Footer />
-          <Toast />
-          <Cursor />
-        </RouterProvider>
-      </StoreProvider>
+      <LangProvider>
+        <StoreProvider>
+          <RouterProvider>
+            <SkipLink />
+            <Header />
+            <main id="main" tabIndex={-1}>
+              <Page />
+            </main>
+            <Footer />
+            <Toast />
+            <Cursor />
+          </RouterProvider>
+        </StoreProvider>
+      </LangProvider>
     </MotionConfig>
   );
 }

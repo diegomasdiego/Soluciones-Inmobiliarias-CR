@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type ImgHTMLAttributes
 import { AnimatePresence, motion } from 'motion/react';
 import { getMedia } from '../lib/media';
 import { money } from '../lib/format';
+import { useLang } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { IconHeart } from './Icons';
 
@@ -77,32 +78,36 @@ export function Price({ usd, className, prefix }: { usd: number; className?: str
 
 export function SaveButton({ slug, className, label }: { slug: string; className?: string; label?: boolean }) {
   const { saved, toggleSaved, notify } = useStore();
+  const { tx } = useLang();
   const on = saved.includes(slug);
   return (
     <button
       type="button"
       className={`save-btn ${on ? 'is-on' : ''} ${className ?? ''}`}
       aria-pressed={on}
-      aria-label={on ? 'Remove from saved' : 'Save property'}
+      aria-label={on ? tx('Remove from saved', 'Quitar de guardadas') : tx('Save property', 'Guardar propiedad')}
       onClick={e => {
         e.preventDefault();
         e.stopPropagation();
         const added = toggleSaved(slug);
-        notify(added ? 'Saved. Compare saved homes side by side in phase 2.' : 'Removed from saved.');
+        notify(added
+          ? tx('Saved. Compare saved homes side by side in phase 2.', 'Guardada. El comparador de propiedades llega en la fase 2.')
+          : tx('Removed from saved.', 'Se quitó de guardadas.'));
       }}
     >
       <motion.span key={String(on)} initial={on ? { scale: 0.6 } : false} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 14 }} style={{ display: 'inline-flex' }}>
         <IconHeart size={18} />
       </motion.span>
-      {label && <span>{on ? 'Saved' : 'Save'}</span>}
+      {label && <span>{on ? tx('Saved', 'Guardada') : tx('Save', 'Guardar')}</span>}
     </button>
   );
 }
 
 export function CurrencyToggle({ dark }: { dark?: boolean }) {
   const { currency, setCurrency } = useStore();
+  const { tx } = useLang();
   return (
-    <div className={`seg ${dark ? 'seg-dark' : ''}`} role="group" aria-label="Currency">
+    <div className={`seg seg-currency ${dark ? 'seg-dark' : ''}`} role="group" aria-label={tx('Currency', 'Moneda')}>
       {(['USD', 'CRC'] as const).map(c => (
         <button key={c} type="button" aria-pressed={currency === c} onClick={() => setCurrency(c)}>
           {currency === c && <motion.span layoutId={`seg-${dark ? 'd' : 'l'}`} className="seg-bg" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}

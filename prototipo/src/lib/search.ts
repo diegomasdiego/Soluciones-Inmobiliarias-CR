@@ -1,6 +1,9 @@
 // Filters for the Search page and a rule-based natural-language parser that stands in
 // for the AI search in this prototype (production would call a language model).
+// Understands English and Spanish; labels come back in the page language.
 import { properties, grossYield, isResidencyEligible, type Area, type Property, type PropertyType } from '../data/properties';
+import { typeLabel } from '../data/properties.es';
+import type { Lang } from './i18n';
 
 export type Filters = {
   types: PropertyType[];
@@ -34,10 +37,10 @@ const areaWords: [RegExp, Area][] = [
 
 const typeWords: [RegExp, PropertyType][] = [
   [/\b(house|home|casa|villa)s?\b/i, 'House'],
-  [/\b(condo|condominium|apartment|apartamento|apto|flat|unit)s?\b/i, 'Condo'],
+  [/\b(condo|condominium|condominio|apartment|apartamento|apto|flat|unit)s?\b/i, 'Condo'],
   [/\b(lot|land|lote|terreno|plot)s?\b/i, 'Lot'],
   [/\b(farm|finca|ranch|hacienda|acre|hect[aá]rea)s?\b/i, 'Farm'],
-  [/\b(office|commercial|local|oficina|retail)s?\b/i, 'Commercial'],
+  [/\b(office|commercial|local|oficina|retail|comercial)s?\b/i, 'Commercial'],
   [/pre-?sale|preventa|new development|off-plan/i, 'Pre-sale'],
 ];
 
@@ -50,11 +53,12 @@ function parseAmount(raw: string, unit?: string): number {
   return n;
 }
 
-const money = (n: number) => '$' + n.toLocaleString('en-US');
+const money = (n: number, lang: Lang = 'en') => '$' + (lang === 'es' ? n.toLocaleString('en-US').replace(/,/g, '.') : n.toLocaleString('en-US'));
 
-export function parseQuery(q: string): { filters: Filters; understood: string[] } {
+export function parseQuery(q: string, lang: Lang = 'en'): { filters: Filters; understood: string[] } {
   const f: Filters = { types: [], areas: [] };
   const understood: string[] = [];
+  const say = (en: string, es: string) => understood.push(lang === 'es' ? es : en);
   const s = q.trim();
   if (!s) return { filters: f, understood };
 
@@ -62,29 +66,29 @@ export function parseQuery(q: string): { filters: Filters; understood: string[] 
   if (bed) {
     const n = words[bed[1].toLowerCase()] ?? parseInt(bed[1], 10);
     f.minBeds = n;
-    understood.push(`${n}+ bedrooms`);
+    say(`${n}+ bedrooms`, `${n}+ habitaciones`);
   }
 
   const max = s.match(/(under|below|max(imum)?|less than|up to|no more than|hasta|menos de|m[aá]ximo|bajo)\s*(us)?\$?\s*([\d.,]+)\s*(millones|million|mil|k|m)?\b/i);
   if (max) {
     f.maxPrice = parseAmount(max[4], max[5]);
-    understood.push(`Under ${money(f.maxPrice)}`);
+    say(`Under ${money(f.maxPrice)}`, `Hasta ${money(f.maxPrice, 'es')}`);
   }
   const min = s.match(/(over|above|at least|more than|from|m[aá]s de|desde)\s*(us)?\$?\s*([\d.,]+)\s*(millones|million|mil|k|m)?\b/i);
   if (min) {
     f.minPrice = parseAmount(min[3], min[4]);
-    understood.push(`Over ${money(f.minPrice)}`);
+    say(`Over ${money(f.minPrice)}`, `Desde ${money(f.minPrice, 'es')}`);
   }
 
   for (const [re, area] of areaWords) if (re.test(s) && !f.areas.includes(area)) { f.areas.push(area); understood.push(area); }
-  for (const [re, type] of typeWords) if (re.test(s) && !f.types.includes(type)) { f.types.push(type); understood.push(type === 'Pre-sale' ? 'Pre-sale' : type + 's'); }
+  for (const [re, type] of typeWords) if (re.test(s) && !f.types.includes(type)) { f.types.push(type); understood.push(typeLabel(type, lang, true)); }
 
-  if (/pool|piscina/i.test(s)) { f.pool = true; understood.push('With pool'); }
-  if (/view|vista|mirador/i.test(s)) { f.view = true; understood.push('With a view'); }
-  if (/school|escuela|colegio|kids|niños/i.test(s)) { f.nearSchools = true; understood.push('Near schools'); }
-  if (/airport|aeropuerto|\bsjo\b|travel|viaj/i.test(s)) { f.nearAirport = true; understood.push('Close to SJO airport'); }
-  if (/\b(rent(al|ing)?|invest(ment|ing)?|income|yield|airbnb|alquil\w*|inversi[oó]n|renta)\b/i.test(s)) { f.investment = true; understood.push('Good rental yield'); }
-  if (/residen|visa|9996|immigra|migra/i.test(s)) { f.residency = true; understood.push('Residency-eligible'); }
+  if (/pool|piscina/i.test(s)) { f.pool = true; say('With pool', 'Con piscina'); }
+  if (/view|vista|mirador/i.test(s)) { f.view = true; say('With a view', 'Con vista'); }
+  if (/school|escuela|colegio|kids|niños/i.test(s)) { f.nearSchools = true; say('Near schools', 'Cerca de escuelas'); }
+  if (/airport|aeropuerto|\bsjo\b|travel|viaj/i.test(s)) { f.nearAirport = true; say('Close to SJO airport', 'Cerca del aeropuerto SJO'); }
+  if (/\b(rent(al|ing)?|invest(ment|ing)?|income|yield|airbnb|alquil\w*|inversi[oó]n|renta\w*)\b/i.test(s)) { f.investment = true; say('Good rental yield', 'Buena rentabilidad'); }
+  if (/residen|visa|9996|immigra|migra/i.test(s)) { f.residency = true; say('Residency-eligible', 'Apta para residencia'); }
 
   if (!understood.length) { f.text = s; understood.push(`“${s}”`); }
   return { filters: f, understood };
@@ -116,14 +120,15 @@ export function applyFilters(list: Property[], f: Filters, sort: Sort): Property
   });
 }
 
-export function explainMatch(p: Property, f: Filters): string {
+export function explainMatch(p: Property, f: Filters, lang: Lang = 'en'): string {
+  const es = lang === 'es';
   const bits: string[] = [];
-  if (f.nearSchools) { const s = p.nearby.find(n => n.kind === 'school'); if (s) bits.push(`${s.minutes} min to ${s.name}`); }
-  if (f.nearAirport) { const a = p.nearby.find(n => n.kind === 'airport'); if (a) bits.push(`${a.minutes} min to SJO`); }
-  if (f.investment) { const y = grossYield(p); if (y) bits.push(`${(y * 100).toFixed(1)}% est. gross yield`); }
-  if (f.residency) bits.push('qualifies for investor residency');
-  if (f.pool && p.pool) bits.push('private or shared pool');
-  if (f.view && p.view) bits.push('open views');
+  if (f.nearSchools) { const s = p.nearby.find(n => n.kind === 'school'); if (s) bits.push(es ? `${s.minutes} min a ${s.name}` : `${s.minutes} min to ${s.name}`); }
+  if (f.nearAirport) { const a = p.nearby.find(n => n.kind === 'airport'); if (a) bits.push(es ? `${a.minutes} min al SJO` : `${a.minutes} min to SJO`); }
+  if (f.investment) { const y = grossYield(p); if (y) bits.push(es ? `${(y * 100).toFixed(1).replace('.', ',')}% de rentabilidad bruta estimada` : `${(y * 100).toFixed(1)}% est. gross yield`); }
+  if (f.residency) bits.push(es ? 'califica para residencia de inversionista' : 'qualifies for investor residency');
+  if (f.pool && p.pool) bits.push(es ? 'piscina privada o común' : 'private or shared pool');
+  if (f.view && p.view) bits.push(es ? 'vista abierta' : 'open views');
   return bits.join(' · ');
 }
 
