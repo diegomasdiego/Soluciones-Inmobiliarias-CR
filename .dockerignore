@@ -1,0 +1,7 @@
+.git
+.claude
+**/node_modules
+prototipo/dist
+prototipo/artifact
+*.pdf
+*.log

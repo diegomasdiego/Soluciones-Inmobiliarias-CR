@@ -65,12 +65,12 @@ export function parseQuery(q: string): { filters: Filters; understood: string[] 
     understood.push(`${n}+ bedrooms`);
   }
 
-  const max = s.match(/(under|below|max(imum)?|less than|up to|no more than|hasta|menos de|m[aá]ximo|bajo)\s*(us)?\$?\s*([\d.,]+)\s*(k|m|mil|million|millones)?/i);
+  const max = s.match(/(under|below|max(imum)?|less than|up to|no more than|hasta|menos de|m[aá]ximo|bajo)\s*(us)?\$?\s*([\d.,]+)\s*(millones|million|mil|k|m)?\b/i);
   if (max) {
     f.maxPrice = parseAmount(max[4], max[5]);
     understood.push(`Under ${money(f.maxPrice)}`);
   }
-  const min = s.match(/(over|above|at least|more than|from|m[aá]s de|desde)\s*(us)?\$?\s*([\d.,]+)\s*(k|m|mil|million|millones)?/i);
+  const min = s.match(/(over|above|at least|more than|from|m[aá]s de|desde)\s*(us)?\$?\s*([\d.,]+)\s*(millones|million|mil|k|m)?\b/i);
   if (min) {
     f.minPrice = parseAmount(min[3], min[4]);
     understood.push(`Over ${money(f.minPrice)}`);
@@ -83,7 +83,7 @@ export function parseQuery(q: string): { filters: Filters; understood: string[] 
   if (/view|vista|mirador/i.test(s)) { f.view = true; understood.push('With a view'); }
   if (/school|escuela|colegio|kids|niños/i.test(s)) { f.nearSchools = true; understood.push('Near schools'); }
   if (/airport|aeropuerto|\bsjo\b|travel|viaj/i.test(s)) { f.nearAirport = true; understood.push('Close to SJO airport'); }
-  if (/rent|rental|invest|income|yield|airbnb|alquil|inversi[oó]n|renta/i.test(s)) { f.investment = true; understood.push('Good rental yield'); }
+  if (/\b(rent(al|ing)?|invest(ment|ing)?|income|yield|airbnb|alquil\w*|inversi[oó]n|renta)\b/i.test(s)) { f.investment = true; understood.push('Good rental yield'); }
   if (/residen|visa|9996|immigra|migra/i.test(s)) { f.residency = true; understood.push('Residency-eligible'); }
 
   if (!understood.length) { f.text = s; understood.push(`“${s}”`); }

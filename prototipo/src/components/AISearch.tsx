@@ -5,11 +5,11 @@ import { useStore } from '../lib/store';
 import { IconArrow, IconSpark } from './Icons';
 
 const examples = [
-  '3 bedrooms in Santa Ana under $450k near schools',
+  '3 bedrooms in Escazú under $500k near schools',
   'Condo near the airport I can rent out',
-  'Lot with a view to build my own house',
+  'Lot with a view to build on',
   'Farm with water in Alajuela',
-  'Casa con piscina en Escazú, menos de 500 mil',
+  'Casa con piscina en Santa Ana, menos de 500 mil',
 ];
 
 const chips = [

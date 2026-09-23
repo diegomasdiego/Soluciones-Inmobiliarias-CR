@@ -52,7 +52,7 @@ function Hero() {
           Real estate · Land &amp; Build · Central Valley, Costa Rica
         </motion.p>
         <h1 className="hero-title">
-          <span className="line"><motion.span initial={{ y: '108%' }} animate={{ y: 0 }} transition={{ delay: 0.2, duration: 1.1, ease }}>Solid <em>ground</em></motion.span></span>
+          <span className="line"><motion.span initial={{ y: '108%' }} animate={{ y: 0 }} transition={{ delay: 0.2, duration: 1.1, ease }}>Solid <em>ground</em></motion.span></span>{' '}
           <span className="line"><motion.span initial={{ y: '108%' }} animate={{ y: 0 }} transition={{ delay: 0.34, duration: 1.1, ease }}>in Costa Rica.</motion.span></span>
         </h1>
         <motion.p className="hero-lead" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.9 }}>
