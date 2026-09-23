@@ -8,6 +8,7 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "media": "node scripts/fetch-media.mjs",
+    "logo": "node scripts/trace-logo.mjs",
     "brand": "node scripts/make-brand-assets.mjs",
     "preview": "vite preview",
     "artifact": "npm run build && node scripts/build-artifact.mjs"
@@ -21,6 +22,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "potrace": "^2.1.8",
     "sharp": "^0.35.4",
     "typescript": "^7.0.2",
     "vite": "^8.3.0"

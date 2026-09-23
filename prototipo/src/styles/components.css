@@ -1,10 +1,9 @@
 /* Shared components: header, footer, cursor, toast, search, cards, map, 360°, plan, lightbox, forms. */
 
 /* Logo */
-.logo { display: inline-flex; align-items: center; gap: 10px; }
-.logo-text { display: grid; line-height: 1; }
-.logo-word { font-family: var(--serif); font-size: 26px; letter-spacing: -.01em; }
-.logo-sub { font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase; opacity: .75; margin-top: 3px; }
+.logo { display: inline-flex; align-items: center; }
+.logo-lockup { display: block; height: 46px; width: auto; }
+.footer-badge { display: block; width: 132px; height: 132px; }
 
 /* Header */
 .site-header {
@@ -44,9 +43,7 @@
 @media (max-width: 560px) {
   .header-tools { gap: 8px; }
   .header-tools .seg-currency { display: none; }
-  .logo-word { font-size: 22px; }
-  .logo-sub { font-size: 8.5px; }
-  .logo svg { width: 30px; height: 30px; }
+  .logo-lockup { height: 40px; }
 }
 @media (max-width: 420px) {
   .saved-count { display: none; }
@@ -58,7 +55,7 @@
 .footer-grid h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #8E9C93; margin-bottom: 14px; }
 .footer-grid a, .footer-grid span { display: block; font-size: 14.5px; line-height: 1.5; margin-bottom: 8px; color: inherit; text-decoration: none; }
 .footer-grid a:hover { color: #fff; }
-.footer-brand .logo { color: #fff; margin-bottom: 16px; }
+.footer-brand .footer-badge { margin-bottom: 18px; }
 .footer-brand p { font-size: 15px; max-width: 34ch; }
 .footer-base { margin-top: 56px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, .1); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 12.5px; color: #8E9C93; }
 @media (max-width: 980px) { .footer-grid { grid-template-columns: 1fr 1fr; } .footer-brand { grid-column: 1 / -1; } }

@@ -5,26 +5,12 @@ import { money } from '../lib/format';
 import { useLang } from '../lib/i18n';
 import { useStore } from '../lib/store';
 import { IconHeart } from './Icons';
-
-export function LogoMark({ size = 34 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-      <ellipse cx="24" cy="27" rx="20" ry="14" />
-      <ellipse cx="23" cy="24.5" rx="13.5" ry="9.5" />
-      <ellipse cx="22.5" cy="22" rx="7.5" ry="5.2" />
-      <circle cx="22.2" cy="20.8" r="1.9" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
+import { LogoLockup } from './Logo';
 
 export function Logo() {
   return (
     <span className="logo">
-      <LogoMark />
-      <span className="logo-text">
-        <span className="logo-word">Soluciones</span>
-        <span className="logo-sub">Inmobiliarias · CR</span>
-      </span>
+      <LogoLockup className="logo-lockup" />
     </span>
   );
 }

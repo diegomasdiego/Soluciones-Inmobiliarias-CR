@@ -7,6 +7,7 @@ import { Link, useRouter, type Route } from '../lib/router';
 import { useStore } from '../lib/store';
 import { CurrencyToggle, Logo } from './Basics';
 import { IconClose, IconHeart, IconMenu } from './Icons';
+import { LogoBadge } from './Logo';
 
 export function LangToggle({ dark, big }: { dark?: boolean; big?: boolean }) {
   const { lang, setLang } = useLang();
@@ -103,7 +104,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="wrap footer-grid">
         <div className="footer-brand">
-          <Logo />
+          <LogoBadge variant="on-dark" className="footer-badge" />
           <p>{tx('Verified homes, lots and farms in the western Central Valley, and the machines to prepare your land.', 'Casas, lotes y fincas verificados en el oeste del Valle Central, y la maquinaria para preparar su terreno.')}</p>
         </div>
         <div>

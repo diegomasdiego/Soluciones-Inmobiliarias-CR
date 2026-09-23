@@ -11,8 +11,17 @@ npm run typecheck  # verificación de tipos
 npm run build      # build de producción en dist/
 npm run artifact   # build + página única en artifact/ (para publicar como link)
 npm run media      # vuelve a descargar y optimizar fotos y video (ver CREDITS.md)
-npm run brand      # regenera favicon, íconos e imagen para compartir (public/og-image.jpg)
+npm run logo       # vectoriza ../logo.JPG (logo del cliente) en src/data/logo.ts
+npm run brand      # regenera favicon, íconos, imagen para compartir y archivos de marca (brand/)
 ```
+
+## Logo
+
+El logo del cliente (`../logo.JPG`, dorado sobre negro) se vectorizó sin cambiar sus formas y se recoloreó con la paleta del sitio:
+
+- **Encabezado:** edificio + "SOLUCIONES / INMOBILIARIAS / C.R." en una línea horizontal, en el color del texto (blanco sobre el video, Basalto sobre fondo claro). Componente `LogoLockup`.
+- **Emblema completo:** `LogoBadge` en el pie de página, íconos y vista previa de WhatsApp.
+- **Archivos para el equipo** en `brand/`: emblema sobre Cafetal y sobre Basalto (SVG y PNG 1024 px), versiones solo línea para fondo claro u oscuro y el logotipo horizontal.
 
 ## Vista previa al compartir (WhatsApp, redes)
 
