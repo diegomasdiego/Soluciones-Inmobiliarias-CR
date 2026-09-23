@@ -11,7 +11,12 @@ npm run typecheck  # verificación de tipos
 npm run build      # build de producción en dist/
 npm run artifact   # build + página única en artifact/ (para publicar como link)
 npm run media      # vuelve a descargar y optimizar fotos y video (ver CREDITS.md)
+npm run brand      # regenera favicon, íconos e imagen para compartir (public/og-image.jpg)
 ```
+
+## Vista previa al compartir (WhatsApp, redes)
+
+`index.html` trae etiquetas Open Graph con la imagen `public/og-image.jpg` (1200 × 630). Como WhatsApp exige URLs absolutas, las etiquetas usan `__SITE_URL__` y nginx lo reemplaza por `https://<dominio>` al servir la página (ver `deploy/nginx.conf.template`). Funciona con el dominio de Railway y con un dominio propio sin cambiar nada.
 
 ## Despliegue
 

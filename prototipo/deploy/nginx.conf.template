@@ -21,9 +21,18 @@ server {
         try_files $uri =404;
     }
 
+    # Brand icons and the link-preview image.
+    location ~* ^/(favicon\.svg|favicon-32\.png|apple-touch-icon\.png|icon-(192|512)\.png|og-image\.jpg|site\.webmanifest)$ {
+        add_header Cache-Control "public, max-age=86400";
+        try_files $uri =404;
+    }
+
     # Single-page app: routes live in the URL hash, everything else falls back to index.html.
+    # Link previews need absolute URLs, so __SITE_URL__ becomes the domain the page was requested on.
     location / {
         add_header Cache-Control "no-cache";
+        sub_filter '__SITE_URL__' 'https://$host';
+        sub_filter_once off;
         try_files $uri $uri/ /index.html;
     }
 }

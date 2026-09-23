@@ -1,6 +1,7 @@
 node_modules
 dist
 artifact
+scripts/.cache
 build
 *.log
 .env
