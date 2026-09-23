@@ -1,0 +1,27 @@
+{
+  "name": "soluciones-inmobiliarias-cr",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "media": "node scripts/fetch-media.mjs",
+    "preview": "vite preview",
+    "artifact": "npm run build && node scripts/build-artifact.mjs"
+  },
+  "dependencies": {
+    "motion": "^13.4.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "sharp": "^0.35.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0"
+  }
+}
