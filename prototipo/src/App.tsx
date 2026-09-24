@@ -1,4 +1,5 @@
 import { MotionConfig } from 'motion/react';
+import { DataProvider } from './lib/data';
 import { LangProvider, useLang } from './lib/i18n';
 import { RouterProvider, useRouter } from './lib/router';
 import { StoreProvider } from './lib/store';
@@ -35,6 +36,7 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <LangProvider>
+        <DataProvider>
         <StoreProvider>
           <RouterProvider>
             <SkipLink />
@@ -47,6 +49,7 @@ export default function App() {
             <Cursor />
           </RouterProvider>
         </StoreProvider>
+        </DataProvider>
       </LangProvider>
     </MotionConfig>
   );

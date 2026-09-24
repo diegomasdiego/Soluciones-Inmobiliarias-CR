@@ -1,5 +1,6 @@
-import { useId, useState, type FormEvent } from 'react';
+import { useId, useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { submitLead } from '../lib/data';
 import { useLang } from '../lib/i18n';
 import { IconCheck } from './Icons';
 
@@ -40,15 +41,19 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
   const uid = useId();
   const [values, setValues] = useState({ name: '', email: '', phone: '', interest: defaultInterest as string, budget: '', message: '', via: 'email' });
   const [errors, setErrors] = useState<Errors>({});
-  const [done, setDone] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'saved' | 'offline' | 'error'>('idle');
+  const honeypot = useRef<HTMLInputElement>(null);
+  const done = status === 'saved' || status === 'offline';
 
   const set = (k: keyof typeof values, v: string) => {
     setValues(s => ({ ...s, [k]: v }));
     if (k in errors) setErrors(e => ({ ...e, [k]: undefined }));
+    if (status === 'error') setStatus('idle');
   };
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (status === 'sending') return;
     const err: Errors = {};
     if (!values.name.trim()) err.name = tx('Enter your name.', 'Escriba su nombre.');
     if (!/^\S+@\S+\.\S+$/.test(values.email.trim())) err.email = tx('Enter an email like name@example.com.', 'Escriba un correo como nombre@ejemplo.com.');
@@ -58,7 +63,25 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
       document.getElementById(`${uid}-${Object.keys(err)[0]}`)?.focus();
       return;
     }
-    setDone(true);
+    setStatus('sending');
+    try {
+      const result = await submitLead({
+        name: values.name,
+        email: values.email,
+        phone: values.phone || undefined,
+        interest: values.interest,
+        budget: values.budget || undefined,
+        message: values.message || undefined,
+        via: values.via,
+        context,
+        lang,
+        page: window.location.hash || '#home',
+        website: honeypot.current?.value || undefined,
+      });
+      setStatus(result);
+    } catch {
+      setStatus('error');
+    }
   };
 
   const field = (k: 'name' | 'email' | 'phone', label: string, type = 'text', optional = false) => {
@@ -80,12 +103,24 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
         {done ? (
           <motion.div key="done" className="cform-done" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <span className="cform-done-icon"><IconCheck size={22} /></span>
-            <h3>{tx(`Request ready, ${values.name.split(' ')[0]}.`, `Solicitud lista, ${values.name.split(' ')[0]}.`)}</h3>
-            <p>{tx(
-              `On the live site this goes straight to an advisor, who replies by ${via.en.toLowerCase()} within one business day. This prototype doesn’t send any data.`,
-              `En el sitio real esto le llega directo a un asesor, que le responde por ${via.es.toLowerCase()} en menos de un día hábil. Este prototipo no envía ningún dato.`,
-            )}</p>
-            <button type="button" className="btn btn-ghost" onClick={() => { setDone(false); setValues(v => ({ ...v, message: '' })); }}>{tx('Write another request', 'Escribir otra solicitud')}</button>
+            {status === 'saved' ? (
+              <>
+                <h3>{tx(`Thank you, ${values.name.split(' ')[0]}. We received your request.`, `Gracias, ${values.name.split(' ')[0]}. Recibimos su solicitud.`)}</h3>
+                <p>{tx(
+                  `An advisor will reply by ${via.en.toLowerCase()} within one business day.`,
+                  `Un asesor le responderá por ${via.es.toLowerCase()} en menos de un día hábil.`,
+                )}</p>
+              </>
+            ) : (
+              <>
+                <h3>{tx(`Request ready, ${values.name.split(' ')[0]}.`, `Solicitud lista, ${values.name.split(' ')[0]}.`)}</h3>
+                <p>{tx(
+                  `On the live site this goes straight to an advisor, who replies by ${via.en.toLowerCase()} within one business day. This preview doesn’t send any data.`,
+                  `En el sitio real esto le llega directo a un asesor, que le responde por ${via.es.toLowerCase()} en menos de un día hábil. Esta vista previa no envía ningún dato.`,
+                )}</p>
+              </>
+            )}
+            <button type="button" className="btn btn-ghost" onClick={() => { setStatus('idle'); setValues(v => ({ ...v, message: '' })); }}>{tx('Write another request', 'Escribir otra solicitud')}</button>
           </motion.div>
         ) : (
           <motion.form key="form" noValidate onSubmit={submit} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -138,7 +173,19 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
                 ))}
               </div>
             </fieldset>
-            <button type="submit" className="btn btn-accent btn-block">{submitLabel ?? tx('Send request', 'Enviar solicitud')}</button>
+            <div className="hp" aria-hidden="true">
+              <label htmlFor={`${uid}-website`}>Website</label>
+              <input ref={honeypot} id={`${uid}-website`} name="website" type="text" tabIndex={-1} autoComplete="off" />
+            </div>
+            {status === 'error' && (
+              <p className="field-error" role="alert">{tx(
+                'We couldn’t send your request. Check your connection and try again.',
+                'No pudimos enviar su solicitud. Revise su conexión e intente de nuevo.',
+              )}</p>
+            )}
+            <button type="submit" className="btn btn-accent btn-block" disabled={status === 'sending'} aria-busy={status === 'sending'}>
+              {status === 'sending' ? tx('Sending…', 'Enviando…') : submitLabel ?? tx('Send request', 'Enviar solicitud')}
+            </button>
             <p className="cform-fine">{tx('We reply within one business day. Your details are used only to answer this request.', 'Respondemos en menos de un día hábil. Sus datos se usan solo para responder esta solicitud.')}</p>
           </motion.form>
         )}

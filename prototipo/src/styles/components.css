@@ -228,3 +228,5 @@
 .cform-done h3 { font-family: var(--serif); font-size: 32px; line-height: 1.05; }
 .cform-done p { color: var(--ink-2); max-width: 48ch; }
 .cform legend { margin-bottom: 8px; }
+.cform .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.cform .btn[disabled] { opacity: .7; cursor: progress; }

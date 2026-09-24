@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { advisors } from '../data/company';
-import { bySlug, grossYield, isResidencyEligible, properties, type Property as P } from '../data/properties';
+import { grossYield, isResidencyEligible, type Property as P } from '../data/properties';
+import { useProperties } from '../lib/data';
 import { localize, typeLabel } from '../data/properties.es';
 import { closingCosts, rentalYield, sum, yearlyHolding } from '../lib/costs';
 import { m2, money, pct } from '../lib/format';
@@ -30,6 +31,7 @@ function NotFound() {
 }
 
 export default function Property({ slug }: { slug: string }) {
+  const { bySlug } = useProperties();
   const p = bySlug(slug);
   if (!p) return <NotFound />;
   return <PropertyView raw={p} key={p.slug} />;
@@ -39,6 +41,7 @@ function PropertyView({ raw }: { raw: P }) {
   const { currency, rate } = useStore();
   const { navigate } = useRouter();
   const { lang, tx } = useLang();
+  const { properties } = useProperties();
   const p = localize(raw, lang);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const refs = {
@@ -64,7 +67,7 @@ function PropertyView({ raw }: { raw: P }) {
   const yieldInfo = p.rentUsd ? rentalYield(p.priceUsd, p.rentUsd, p.hoaUsd) : null;
   const similar = useMemo(
     () => properties.filter(o => o.slug !== p.slug).sort((a, b) => Number(b.area === p.area) - Number(a.area === p.area) || Math.abs(a.priceUsd - p.priceUsd) - Math.abs(b.priceUsd - p.priceUsd)).slice(0, 3),
-    [p.slug, p.area, p.priceUsd],
+    [properties, p.slug, p.area, p.priceUsd],
   );
   const tabs: [keyof typeof refs, string][] = [
     ['overview', tx('Overview', 'Resumen')],

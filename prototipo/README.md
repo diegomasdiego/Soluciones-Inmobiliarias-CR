@@ -27,6 +27,29 @@ El logo del cliente (`../logo.JPG`, dorado sobre negro) se vectorizó sin cambia
 
 `index.html` trae etiquetas Open Graph con la imagen `public/og-image.jpg` (1200 × 630). Como WhatsApp exige URLs absolutas, las etiquetas usan `__SITE_URL__` y nginx lo reemplaza por `https://<dominio>` al servir la página (ver `deploy/nginx.conf.template`). Funciona con el dominio de Railway y con un dominio propio sin cambiar nada.
 
+## Base de datos (Convex)
+
+Proyecto Convex: **soluciones-inmobiliarias-cr**. Funciones en `convex/`:
+
+| Archivo | Qué hace |
+|---|---|
+| `schema.ts` | Tablas `properties` (fichas con textos EN/ES, orden y publicación) y `leads` (solicitudes de los formularios) |
+| `properties.ts` | `properties:list`: propiedades publicadas, en orden |
+| `leads.ts` | `leads:create`: guarda una solicitud (valida, recorta y descarta spam con un campo trampa) |
+| `seed.ts` | `seed:properties`: carga o actualiza las 11 propiedades de ejemplo (por slug) |
+
+```bash
+npm run convex                              # npx convex dev: enlaza y sube funciones (primera vez: inicia sesión)
+npm run seed                                # carga las propiedades en el entorno de desarrollo
+npx convex run seed:properties --prod       # igual, en producción
+npx convex data leads                       # ver las solicitudes recibidas
+```
+
+- Con `VITE_CONVEX_URL` (en `.env.local`, lo crea `npx convex dev`) el sitio lee las propiedades de Convex y guarda los formularios. `<html data-listings="database">` confirma la fuente.
+- Sin esa variable (o con la base vacía) usa las propiedades de ejemplo de `src/data/`, así nunca queda en blanco.
+- Las solicitudes no se pueden leer desde el sitio: se revisan en el panel de Convex (tabla `leads`, campo `status`: `new` / `contacted` / `closed`).
+- `npm run artifact` compila en modo `artifact` (`.env.artifact`) sin base de datos, porque el visor de artifacts bloquea conexiones externas.
+
 ## Despliegue
 
 El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con nginx (`deploy/nginx.conf.template`) en el puerto de la variable `PORT`. Railway lo detecta al importar el repositorio; ver el README de la raíz.

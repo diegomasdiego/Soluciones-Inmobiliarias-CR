@@ -1,7 +1,7 @@
 // Filters for the Search page and a rule-based natural-language parser that stands in
 // for the AI search in this prototype (production would call a language model).
 // Understands English and Spanish; labels come back in the page language.
-import { properties, grossYield, isResidencyEligible, type Area, type Property, type PropertyType } from '../data/properties';
+import { grossYield, isResidencyEligible, type Area, type Property, type PropertyType } from '../data/properties';
 import { typeLabel } from '../data/properties.es';
 import type { Lang } from './i18n';
 
@@ -95,6 +95,7 @@ export function parseQuery(q: string, lang: Lang = 'en'): { filters: Filters; un
 }
 
 export function applyFilters(list: Property[], f: Filters, sort: Sort): Property[] {
+  const order = list.map(p => p.slug);
   const text = f.text?.toLowerCase();
   const out = list.filter(p => {
     if (f.types.length && !f.types.includes(p.type)) return false;
@@ -111,7 +112,6 @@ export function applyFilters(list: Property[], f: Filters, sort: Sort): Property
     if (text && !`${p.title} ${p.headline} ${p.description} ${p.features.join(' ')} ${p.district} ${p.canton}`.toLowerCase().includes(text)) return false;
     return true;
   });
-  const order = properties.map(p => p.slug);
   return out.sort((a, b) => {
     if (sort === 'price-asc') return a.priceUsd - b.priceUsd;
     if (sort === 'price-desc') return b.priceUsd - a.priceUsd;

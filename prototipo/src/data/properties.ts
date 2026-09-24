@@ -40,6 +40,8 @@ export type Property = {
   advisor: string;
   nearby: Nearby[];
   buildReady?: string;
+  /** Spanish text, present on listings loaded from the database. */
+  es?: { headline: string; description: string; features: string[]; legalTitle: string; zoning: string; buildReady?: string };
 };
 
 const laurelesPlan = {

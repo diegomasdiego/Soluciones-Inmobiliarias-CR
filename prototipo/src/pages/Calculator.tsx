@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
-import { bySlug, properties, RESIDENCY_MIN_USD } from '../data/properties';
+import { RESIDENCY_MIN_USD } from '../data/properties';
+import { useProperties } from '../lib/data';
 import { closingCosts, monthlyPayment, rentalYield, sum, yearlyHolding } from '../lib/costs';
 import { money, pct } from '../lib/format';
 import { useLang } from '../lib/i18n';
@@ -51,6 +52,7 @@ function MonthlyBar({ parts, format, hint }: { parts: { key: string; label: stri
 export default function Calculator({ slug }: { slug?: string }) {
   const { currency, rate } = useStore();
   const { lang, tx } = useLang();
+  const { properties, bySlug } = useProperties();
   const preset = slug ? bySlug(slug) : undefined;
   const [source, setSource] = useState(preset?.slug ?? 'custom');
   const [price, setPrice] = useState(preset?.priceUsd ?? 350000);
@@ -69,7 +71,7 @@ export default function Calculator({ slug }: { slug?: string }) {
     const p = bySlug(source);
     if (!p) return;
     setPrice(p.priceUsd); setHoa(p.hoaUsd); setRent(p.rentUsd ?? 0);
-  }, [source]);
+  }, [source, bySlug]);
 
   const dec = (s: string) => (lang === 'es' ? s.replace('.', ',') : s);
   const eligible = price >= RESIDENCY_MIN_USD;

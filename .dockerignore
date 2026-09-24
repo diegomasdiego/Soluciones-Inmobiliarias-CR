@@ -1,6 +1,7 @@
 .git
 .claude
 **/node_modules
+**/.env.local
 prototipo/dist
 prototipo/artifact
 *.pdf

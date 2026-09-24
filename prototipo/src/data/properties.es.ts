@@ -1,8 +1,9 @@
 // Spanish text for the sample listings. Keys are property slugs; anything not listed stays as in properties.ts.
-import type { Lang } from '../lib/i18n';
+// No runtime imports: this file is also bundled into the Convex seed function.
 import type { Property, PropertyType } from './properties';
 
-type EsText = { headline: string; description: string; features: string[]; legalTitle: string; zoning: string; buildReady?: string };
+type Lang = 'en' | 'es';
+export type EsText = { headline: string; description: string; features: string[]; legalTitle: string; zoning: string; buildReady?: string };
 
 const titled = 'Propiedad inscrita, con folio real';
 const condoUnit = 'Filial de condominio inscrita, con folio real';
@@ -119,6 +120,7 @@ const typeNames: Record<PropertyType, { en: [string, string]; es: [string, strin
   'Pre-sale': { en: ['Pre-sale', 'Pre-sale'], es: ['Preventa', 'Preventas'] },
 };
 
+export const esText = (slug: string): EsText | undefined => es[slug];
 export const typeLabel = (t: PropertyType, lang: Lang, plural = false) => typeNames[t][lang][plural ? 1 : 0];
 export const nearbyName = (name: string, lang: Lang) => (lang === 'es' ? nearbyEs[name] ?? name : name);
 export const roomName = (name: string, lang: Lang) => (lang === 'es' ? roomEs[name] ?? name : name);
@@ -126,7 +128,8 @@ export const roomName = (name: string, lang: Lang) => (lang === 'es' ? roomEs[na
 /** A copy of the property with its text fields in the requested language. */
 export function localize(p: Property, lang: Lang): Property {
   if (lang === 'en') return p;
-  const t = es[p.slug];
+  // Listings from the database carry their own Spanish text; bundled samples use the table above.
+  const t = p.es ?? es[p.slug];
   return {
     ...p,
     priceNote: p.priceNote ? 'Desde' : undefined,

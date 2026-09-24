@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { areaList, properties, typeList, type Area, type PropertyType } from '../data/properties';
+import { areaList, typeList, type Area, type PropertyType } from '../data/properties';
+import { useProperties } from '../lib/data';
 import { localize, typeLabel } from '../data/properties.es';
 import { useLang } from '../lib/i18n';
 import { activeFilterCount, applyFilters, emptyFilters, explainMatch, parseQuery, type Filters, type Sort } from '../lib/search';
@@ -17,7 +18,8 @@ export default function Search() {
   const { lang, tx } = useLang();
   const [hover, setHover] = useState<string | null>(null);
   const [view, setView] = useState<'list' | 'map'>('list');
-  const results = useMemo(() => applyFilters(properties, filters, sort), [filters, sort]);
+  const { properties } = useProperties();
+  const results = useMemo(() => applyFilters(properties, filters, sort), [properties, filters, sort]);
   const understood = useMemo(() => (query ? parseQuery(query, lang).understood : []), [query, lang]);
 
   const toggles: { key: keyof Filters; label: string }[] = [

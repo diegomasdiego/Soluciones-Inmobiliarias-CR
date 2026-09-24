@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
 import { company, equipment, testimonials, zones, type Zone } from '../data/company';
-import { bySlug, properties, RESIDENCY_MIN_USD } from '../data/properties';
+import { RESIDENCY_MIN_USD, type Property } from '../data/properties';
+import { useProperties } from '../lib/data';
 import { closingCosts, sum, yearlyHolding } from '../lib/costs';
 import { money } from '../lib/format';
 import { pick, useLang } from '../lib/i18n';
@@ -104,7 +105,9 @@ function Stats() {
 
 function Featured() {
   const { tx } = useLang();
-  const featured = ['los-laureles', 'altos-de-pozos', 'guachipelin-residences'].map(s => bySlug(s)!);
+  const { properties, bySlug } = useProperties();
+  const picks = ['los-laureles', 'altos-de-pozos', 'guachipelin-residences'].map(s => bySlug(s)).filter((p): p is Property => !!p);
+  const featured = picks.length === 3 ? picks : properties.slice(0, 3);
   return (
     <section className="section featured">
       <div className="wrap">
@@ -156,6 +159,7 @@ function ZoneStep({ z, onActive, count }: { z: Zone; onActive: () => void; count
 
 function Zones() {
   const { lang, tx } = useLang();
+  const { properties } = useProperties();
   const [active, setActive] = useState(0);
   const setters = useRef(zones.map((_, i) => () => setActive(i))).current;
   return (
@@ -198,7 +202,8 @@ function Zones() {
 
 function Verified() {
   const { tx } = useLang();
-  const p = bySlug('los-laureles')!;
+  const { properties, bySlug } = useProperties();
+  const p = bySlug('los-laureles') ?? properties[0];
   const checks = [
     tx('Title (Folio Real) and owner confirmed at the Registro Nacional', 'Folio real y propietario confirmados en el Registro Nacional'),
     tx('Cadastral plan matched to the land on the ground', 'Plano catastrado comparado con el terreno en sitio'),
