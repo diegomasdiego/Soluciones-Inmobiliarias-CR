@@ -14,7 +14,8 @@ El prototipo interactivo de la Fase 1 está en [`prototipo/`](prototipo/README.m
 
 1. En el panel de Convex, proyecto **soluciones-inmobiliarias-cr**: **Settings → URL & Deploy Key → Generate Production Deploy Key**.
 2. En Railway, en el servicio: **Variables → New Variable** con nombre `CONVEX_DEPLOY_KEY` y la clave como valor. Railway vuelve a desplegar solo.
-3. El build sube las funciones a producción y compila el sitio con la URL de producción. La primera vez la base de producción está vacía (el sitio muestra las propiedades de ejemplo) hasta cargarla con `npx convex run seed:properties --prod` desde `prototipo/`.
+3. El build sube las funciones a producción y compila el sitio con la URL de producción (`https://modest-dogfish-981.convex.cloud`, definida en el `Dockerfile`). Si ese paso falla, el build lo avisa en el registro y publica igual el sitio conectado a producción con las funciones que ya estaban desplegadas.
+4. Para subir cambios de las funciones de Convex sin Railway: `npx convex deploy` desde `prototipo/`. Para recargar las propiedades de ejemplo: `npx convex run seed:properties --prod`.
 
 ## Desarrollo local
 
