@@ -35,7 +35,8 @@ Proyecto Convex: **soluciones-inmobiliarias-cr**. Funciones en `convex/`:
 |---|---|
 | `schema.ts` | Tablas `properties` (fichas con textos EN/ES, orden y publicación) y `leads` (solicitudes de los formularios) |
 | `properties.ts` | `properties:list`: propiedades publicadas, en orden |
-| `leads.ts` | `leads:create`: guarda una solicitud (valida, recorta y descarta spam con un campo trampa) |
+| `leads.ts` | `leads:create`: guarda una solicitud (valida, recorta, descarta spam con un campo trampa y limita a 3 envíos por correo por hora y 20 por minuto en todo el sitio) y programa el aviso por correo |
+| `notify.ts` | `notify:newLead`: envía al equipo un correo con la solicitud (Resend); "Responder" le escribe directo al cliente |
 | `seed.ts` | `seed:properties`: carga o actualiza las 11 propiedades de ejemplo (por slug) |
 
 ```bash
@@ -47,6 +48,13 @@ npx convex data leads                       # ver las solicitudes recibidas
 
 - Con `VITE_CONVEX_URL` (en `.env.local`, lo crea `npx convex dev`) el sitio lee las propiedades de Convex y guarda los formularios. `<html data-listings="database">` confirma la fuente.
 - Sin esa variable (o con la base vacía) usa las propiedades de ejemplo de `src/data/`, así nunca queda en blanco.
+- **Aviso por correo:** se activa por entorno con variables de Convex. Sin ellas, la solicitud se guarda igual y el registro de Convex indica que los avisos están apagados.
+  ```bash
+  npx convex env set RESEND_API_KEY re_xxx --prod
+  npx convex env set NOTIFY_EMAIL ventas@ejemplo.com --prod       # varios: separados por coma
+  npx convex env set NOTIFY_FROM "Soluciones Inmobiliarias CR <avisos@su-dominio.cr>" --prod   # opcional, requiere dominio verificado en Resend
+  ```
+  Sin `NOTIFY_FROM` se envía desde `onboarding@resend.dev`, que Resend solo permite hacia el correo de la cuenta de Resend.
 - Las solicitudes no se pueden leer desde el sitio: se revisan en el panel de Convex (tabla `leads`, campo `status`: `new` / `contacted` / `closed`).
 - `npm run artifact` compila en modo `artifact` (`.env.artifact`) sin base de datos, porque el visor de artifacts bloquea conexiones externas.
 

@@ -1,5 +1,6 @@
 import { useId, useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { ConvexError } from 'convex/values';
 import { submitLead } from '../lib/data';
 import { useLang } from '../lib/i18n';
 import { IconCheck } from './Icons';
@@ -41,14 +42,14 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
   const uid = useId();
   const [values, setValues] = useState({ name: '', email: '', phone: '', interest: defaultInterest as string, budget: '', message: '', via: 'email' });
   const [errors, setErrors] = useState<Errors>({});
-  const [status, setStatus] = useState<'idle' | 'sending' | 'saved' | 'offline' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'saved' | 'offline' | 'error' | 'rate'>('idle');
   const honeypot = useRef<HTMLInputElement>(null);
   const done = status === 'saved' || status === 'offline';
 
   const set = (k: keyof typeof values, v: string) => {
     setValues(s => ({ ...s, [k]: v }));
     if (k in errors) setErrors(e => ({ ...e, [k]: undefined }));
-    if (status === 'error') setStatus('idle');
+    if (status === 'error' || status === 'rate') setStatus('idle');
   };
 
   const submit = async (e: FormEvent) => {
@@ -79,8 +80,8 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
         website: honeypot.current?.value || undefined,
       });
       setStatus(result);
-    } catch {
-      setStatus('error');
+    } catch (err) {
+      setStatus(err instanceof ConvexError && err.data === 'rate' ? 'rate' : 'error');
     }
   };
 
@@ -181,6 +182,12 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
               <p className="field-error" role="alert">{tx(
                 'We couldn’t send your request. Check your connection and try again.',
                 'No pudimos enviar su solicitud. Revise su conexión e intente de nuevo.',
+              )}</p>
+            )}
+            {status === 'rate' && (
+              <p className="field-error" role="alert">{tx(
+                'We already received several requests from you. An advisor will contact you soon; you can also try again in an hour.',
+                'Ya recibimos varias solicitudes suyas. Un asesor le contactará pronto; también puede intentarlo de nuevo en una hora.',
               )}</p>
             )}
             <button type="submit" className="btn btn-accent btn-block" disabled={status === 'sending'} aria-busy={status === 'sending'}>

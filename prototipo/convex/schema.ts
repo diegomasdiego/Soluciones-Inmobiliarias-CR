@@ -78,5 +78,9 @@ export default defineSchema({
     lang: v.union(v.literal('en'), v.literal('es')),
     page: v.string(),
     status: v.union(v.literal('new'), v.literal('contacted'), v.literal('closed')),
-  }).index('by_status', ['status']),
+    // When the team was emailed about this request (unset if notifications are off or failed).
+    notifiedAt: v.optional(v.number()),
+  })
+    .index('by_status', ['status'])
+    .index('by_email', ['email']),
 });
