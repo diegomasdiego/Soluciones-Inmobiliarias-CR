@@ -230,3 +230,6 @@
 .cform legend { margin-bottom: 8px; }
 .cform .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .cform .btn[disabled] { opacity: .7; cursor: progress; }
+
+/* Placeholder while the team panel chunk loads (#panel). */
+.panel-loading { min-height: 100vh; min-height: 100dvh; background: var(--niebla); }

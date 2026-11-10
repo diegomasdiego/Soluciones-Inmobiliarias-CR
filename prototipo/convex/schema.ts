@@ -1,6 +1,9 @@
 // Convex database schema for Soluciones Inmobiliarias CR.
+import { authTables } from '@convex-dev/auth/server';
 import { defineSchema, defineTable } from 'convex/server';
 import { v } from 'convex/values';
+
+export const leadStatus = v.union(v.literal('new'), v.literal('contacted'), v.literal('closed'));
 
 export const propertyType = v.union(v.literal('House'), v.literal('Condo'), v.literal('Lot'), v.literal('Farm'), v.literal('Commercial'), v.literal('Pre-sale'));
 export const area = v.union(v.literal('Escazú'), v.literal('Santa Ana'), v.literal('Mora'), v.literal('Belén'), v.literal('Heredia'), v.literal('Alajuela'));
@@ -61,6 +64,9 @@ export const propertyFields = {
 };
 
 export default defineSchema({
+  // Team sign-in (Convex Auth): users, accounts, sessions, codes. Only emails in ADMIN_EMAILS get in.
+  ...authTables,
+
   properties: defineTable(propertyFields)
     .index('by_slug', ['slug'])
     .index('by_published_order', ['published', 'order']),
@@ -77,10 +83,20 @@ export default defineSchema({
     context: v.optional(v.string()),
     lang: v.union(v.literal('en'), v.literal('es')),
     page: v.string(),
-    status: v.union(v.literal('new'), v.literal('contacted'), v.literal('closed')),
+    status: leadStatus,
     // When the team was emailed about this request (unset if notifications are off or failed).
     notifiedAt: v.optional(v.number()),
+    // Last status change from the team panel: when and by whom (email).
+    statusAt: v.optional(v.number()),
+    statusBy: v.optional(v.string()),
   })
     .index('by_status', ['status'])
     .index('by_email', ['email']),
+
+  // Follow-up notes the team writes on a request in the panel.
+  leadNotes: defineTable({
+    leadId: v.id('leads'),
+    author: v.string(),
+    text: v.string(),
+  }).index('by_lead', ['leadId']),
 });

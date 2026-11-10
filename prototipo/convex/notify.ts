@@ -7,6 +7,7 @@
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
 import { internalAction } from './_generated/server';
+import { emailEnabled, escapeHtml, sendEmail } from './mail';
 
 const interestLabel: Record<string, string> = {
   home: 'Comprar una casa',
@@ -24,15 +25,11 @@ const budgetLabel: Record<string, string> = {
 };
 const viaLabel: Record<string, string> = { email: 'Correo', whatsapp: 'WhatsApp', video: 'Videollamada' };
 
-const escapeHtml = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-
 export const newLead = internalAction({
   args: { leadId: v.id('leads') },
   handler: async (ctx, { leadId }) => {
-    const apiKey = process.env.RESEND_API_KEY;
     const to = (process.env.NOTIFY_EMAIL ?? '').split(',').map(s => s.trim()).filter(Boolean);
-    if (!apiKey || to.length === 0) {
+    if (!emailEnabled() || to.length === 0) {
       console.log('Email notifications are off: set RESEND_API_KEY and NOTIFY_EMAIL to enable them.');
       return;
     }
@@ -72,26 +69,15 @@ export const newLead = internalAction({
 <p style="margin:20px 0 0;font-size:13px;color:#69746D">Responda a este correo para escribirle directamente al cliente.</p>
 </div>`;
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Idempotency-Key': `lead-${leadId}`,
-      },
-      body: JSON.stringify({
-        from: process.env.NOTIFY_FROM ?? 'Soluciones Inmobiliarias CR <onboarding@resend.dev>',
-        to,
-        reply_to: [lead.email],
-        subject: `Nueva solicitud: ${lead.name} · ${interestLabel[lead.interest] ?? lead.interest}`,
-        text,
-        html,
-      }),
+    // A failure throws, so it shows in the Convex logs; the request itself is already saved.
+    await sendEmail({
+      to,
+      replyTo: [lead.email],
+      subject: `Nueva solicitud: ${lead.name} · ${interestLabel[lead.interest] ?? lead.interest}`,
+      text,
+      html,
+      idempotencyKey: `lead-${leadId}`,
     });
-    if (!res.ok) {
-      // Thrown so the failure shows in the Convex logs; the request itself is already saved.
-      throw new Error(`Resend responded ${res.status}: ${(await res.text()).slice(0, 300)}`);
-    }
     await ctx.runMutation(internal.leads.markNotified, { id: leadId });
   },
 });

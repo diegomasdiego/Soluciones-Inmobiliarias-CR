@@ -16,6 +16,8 @@
     "seed": "convex run seed:properties"
   },
   "dependencies": {
+    "@auth/core": "^0.41.3",
+    "@convex-dev/auth": "^0.0.96",
     "convex": "^1.46.0",
     "motion": "^13.4.1",
     "react": "^19.3.0",

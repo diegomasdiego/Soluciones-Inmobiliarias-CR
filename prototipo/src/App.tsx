@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { MotionConfig } from 'motion/react';
 import { DataProvider } from './lib/data';
 import { LangProvider, useLang } from './lib/i18n';
@@ -10,6 +11,9 @@ import Property from './pages/Property';
 import Calculator from './pages/Calculator';
 import Build from './pages/Build';
 import Contact from './pages/Contact';
+
+// Team panel: its own chunk, so visitors never download it.
+const Panel = lazy(() => import('./pages/Panel'));
 
 function Page() {
   const { route } = useRouter();
@@ -32,6 +36,29 @@ function SkipLink() {
   );
 }
 
+function Layout() {
+  const { route } = useRouter();
+  if (route.name === 'panel') {
+    return (
+      <Suspense fallback={<div className="panel-loading" aria-busy="true" />}>
+        <Panel />
+      </Suspense>
+    );
+  }
+  return (
+    <>
+      <SkipLink />
+      <Header />
+      <main id="main" tabIndex={-1}>
+        <Page />
+      </main>
+      <Footer />
+      <Toast />
+      <Cursor />
+    </>
+  );
+}
+
 export default function App() {
   return (
     <MotionConfig reducedMotion="user">
@@ -39,14 +66,7 @@ export default function App() {
         <DataProvider>
         <StoreProvider>
           <RouterProvider>
-            <SkipLink />
-            <Header />
-            <main id="main" tabIndex={-1}>
-              <Page />
-            </main>
-            <Footer />
-            <Toast />
-            <Cursor />
+            <Layout />
           </RouterProvider>
         </StoreProvider>
         </DataProvider>

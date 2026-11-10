@@ -12,7 +12,7 @@ const SITE_WIDE_PER_MINUTE = 20;
  * Saves a request from any form on the site and schedules the email to the team.
  * Public on purpose (visitors are anonymous), so it validates and trims everything,
  * ignores submissions that fill the honeypot field and rate-limits repeated sends.
- * Leads are never readable from the site; the team reviews them in the Convex dashboard.
+ * Leads are readable only by signed-in team members, through the panel functions in team.ts.
  */
 export const create = mutation({
   args: {

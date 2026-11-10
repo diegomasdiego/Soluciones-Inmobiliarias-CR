@@ -8,11 +8,17 @@
  * @module
  */
 
+import type * as access from "../access.js";
 import type * as admin from "../admin.js";
+import type * as auth from "../auth.js";
+import type * as authEmail from "../authEmail.js";
+import type * as http from "../http.js";
 import type * as leads from "../leads.js";
+import type * as mail from "../mail.js";
 import type * as notify from "../notify.js";
 import type * as properties from "../properties.js";
 import type * as seed from "../seed.js";
+import type * as team from "../team.js";
 
 import type {
   ApiFromModules,
@@ -21,11 +27,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  access: typeof access;
   admin: typeof admin;
+  auth: typeof auth;
+  authEmail: typeof authEmail;
+  http: typeof http;
   leads: typeof leads;
+  mail: typeof mail;
   notify: typeof notify;
   properties: typeof properties;
   seed: typeof seed;
+  team: typeof team;
 }>;
 
 /**

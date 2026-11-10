@@ -1,11 +1,12 @@
 import { useId, useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ConvexError } from 'convex/values';
+import { budgets, interests, ways, type InterestId } from '../data/leadOptions';
 import { submitLead } from '../lib/data';
 import { useLang } from '../lib/i18n';
 import { IconCheck } from './Icons';
 
-export type InterestId = 'home' | 'land' | 'invest' | 'sell' | 'build' | 'other';
+export type { InterestId };
 
 type Props = {
   context?: string;
@@ -14,26 +15,6 @@ type Props = {
   dark?: boolean;
   submitLabel?: string;
 };
-
-const interests: { id: InterestId; en: string; es: string }[] = [
-  { id: 'home', en: 'Buying a home', es: 'Comprar una casa' },
-  { id: 'land', en: 'Buying land or a farm', es: 'Comprar un lote o una finca' },
-  { id: 'invest', en: 'Investing / rentals', es: 'Invertir / alquileres' },
-  { id: 'sell', en: 'Selling my property', es: 'Vender mi propiedad' },
-  { id: 'build', en: 'Land & Build (machinery)', es: 'Land & Build (maquinaria)' },
-  { id: 'other', en: 'Something else', es: 'Otra consulta' },
-];
-const budgets = [
-  { id: 'lt150', en: 'Under $150,000', es: 'Menos de $150.000' },
-  { id: '150-300', en: '$150,000 – $300,000', es: '$150.000 – $300.000' },
-  { id: '300-500', en: '$300,000 – $500,000', es: '$300.000 – $500.000' },
-  { id: 'gt500', en: 'Over $500,000', es: 'Más de $500.000' },
-];
-const ways = [
-  { id: 'email', en: 'Email', es: 'Correo' },
-  { id: 'whatsapp', en: 'WhatsApp', es: 'WhatsApp' },
-  { id: 'video', en: 'Video call', es: 'Videollamada' },
-];
 
 type Errors = Partial<Record<'name' | 'email' | 'message', string>>;
 

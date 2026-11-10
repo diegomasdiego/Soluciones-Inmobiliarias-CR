@@ -37,6 +37,11 @@ Proyecto Convex: **soluciones-inmobiliarias-cr**. Funciones en `convex/`:
 | `properties.ts` | `properties:list`: propiedades publicadas, en orden |
 | `leads.ts` | `leads:create`: guarda una solicitud (valida, recorta, descarta spam con un campo trampa y limita a 3 envíos por correo por hora y 20 por minuto en todo el sitio) y programa el aviso por correo |
 | `notify.ts` | `notify:newLead`: envía al equipo un correo con la solicitud (Resend); "Responder" le escribe directo al cliente |
+| `mail.ts` | Envío de correos con Resend, compartido por los avisos y los códigos de acceso |
+| `auth.ts`, `authEmail.ts`, `auth.config.ts`, `http.ts` | Acceso al panel (Convex Auth): código por correo, correo y contraseña, o Google |
+| `access.ts` | Lista del equipo (`ADMIN_EMAILS`) y verificación en cada llamada del panel |
+| `team.ts` | Funciones del panel: listar y filtrar solicitudes, conteos, detalle, cambiar estado, notas |
+| `admin.ts` | Internas, solo desde la terminal: `admin:deleteLeads` (borra solicitudes y sus notas) y `admin:deleteUser` (borra los datos de acceso de una persona) |
 | `seed.ts` | `seed:properties`: carga o actualiza las 11 propiedades de ejemplo (por slug) |
 
 ```bash
@@ -55,8 +60,40 @@ npx convex data leads                       # ver las solicitudes recibidas
   npx convex env set NOTIFY_FROM "Soluciones Inmobiliarias CR <avisos@su-dominio.cr>" --prod   # opcional, requiere dominio verificado en Resend
   ```
   Sin `NOTIFY_FROM` se envía desde `onboarding@resend.dev`, que Resend solo permite hacia el correo de la cuenta de Resend.
-- Las solicitudes no se pueden leer desde el sitio: se revisan en el panel de Convex (tabla `leads`, campo `status`: `new` / `contacted` / `closed`).
+- Las solicitudes solo se leen en el panel del equipo (abajo), con sesión iniciada. Ninguna función pública las devuelve sin sesión.
 - `npm run artifact` compila en modo `artifact` (`.env.artifact`) sin base de datos, porque el visor de artifacts bloquea conexiones externas.
+
+## Panel del equipo (`#panel`)
+
+Página privada en `https://<dominio>/#panel` (no aparece en el menú y no se indexa). Lista las solicitudes con filtros por estado, interés, fecha y texto; muestra el detalle, permite cambiar el estado (`Nueva` / `Contactada` / `Cerrada`, con quién y cuándo) y escribir notas de seguimiento. Se actualiza sola cuando llega una solicitud. Va en un archivo aparte, así que los visitantes del sitio no lo descargan.
+
+**Quién entra:** solo los correos de `ADMIN_EMAILS`. El servidor lo revisa en cada consulta, así que quitar un correo de la lista corta el acceso de inmediato.
+
+```bash
+npx convex env set ADMIN_EMAILS "ventas@ejemplo.com,otra.persona@ejemplo.com" --prod
+```
+
+**Formas de entrar** (se activan por entorno; la pantalla de acceso indica cuáles faltan):
+
+| Forma | Necesita |
+|---|---|
+| Código de 8 dígitos por correo | `RESEND_API_KEY` (la misma de los avisos) |
+| Correo y contraseña (mín. 10 caracteres; el correo se confirma una vez con un código, y "¿Olvidó su contraseña?" usa otro código) | `RESEND_API_KEY` |
+| Cuenta de Google | `AUTH_GOOGLE_ID` y `AUTH_GOOGLE_SECRET` |
+
+Google: en Google Cloud Console → APIs y servicios → Credenciales → Crear ID de cliente de OAuth → Aplicación web.
+- Orígenes autorizados: `https://soluciones-inmobiliarias-cr-production.up.railway.app` (y `http://localhost:5173` para desarrollo).
+- URI de redireccionamiento: `https://modest-dogfish-981.convex.site/api/auth/callback/google` (producción) y `https://fantastic-axolotl-351.convex.site/api/auth/callback/google` (desarrollo).
+
+Para que las claves no queden en el historial de la terminal, cópielas y páselas por la entrada estándar (PowerShell):
+
+```powershell
+Get-Clipboard | npx convex env set AUTH_GOOGLE_SECRET --prod
+```
+
+**Ya configurado en cada entorno:** `JWT_PRIVATE_KEY` y `JWKS` (firma de las sesiones, distintas en desarrollo y producción) y `SITE_URL` (`http://localhost:5173` en desarrollo, el dominio de Railway en producción). Si el sitio pasa a un dominio propio, cambie `SITE_URL` en producción; si no, la entrada con Google regresa al dominio anterior.
+
+**Quitar a alguien:** sáquelo de `ADMIN_EMAILS` (corta el acceso) y, si quiere borrar sus datos de acceso, `npx convex run admin:deleteUser '{"email":"persona@ejemplo.com"}' --prod`. Sus notas se conservan.
 
 ## Despliegue
 
@@ -72,6 +109,7 @@ El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con
 | `#calculator` / `#calculator-<slug>` | Calculadora de costo real: cierre, hipoteca, impuestos, residencia (Ley 9996), rentabilidad |
 | `#build` | Land & Build: servicios, flota, proceso, estimador de viajes de vagoneta, cotización |
 | `#contact` | Contacto |
+| `#panel` | Panel privado del equipo (solicitudes) |
 
 ## Estructura
 
@@ -90,7 +128,7 @@ public/media/  fotos (webp), panorámicas 360° y video
 
 - **Datos:** propiedades, cifras de la empresa, testimonios, números de folio y plano son de ejemplo.
 - **Buscador "IA":** es un parser por reglas (`src/lib/search.ts`) que entiende inglés y español. En producción se reemplaza por un modelo de lenguaje con el mismo contrato (`texto → filtros + explicación`).
-- **Formularios:** validan pero no envían datos. Conectar a CRM o correo en producción.
+- **Formularios:** guardan la solicitud en Convex y avisan por correo cuando Resend está configurado. En el artifact (sin base de datos) solo validan.
 - **Mapa:** ilustrado, con posiciones aproximadas. Para producción se recomienda MapLibre con teselas reales.
 - **Tour 360° y video:** material libre de ejemplo (ver `CREDITS.md`).
 

@@ -1,12 +1,15 @@
 // Data layer. With VITE_CONVEX_URL set, listings come live from Convex and form requests are saved there.
 // Without it (local preview, the published artifact) the site uses the bundled sample listings.
+// ConvexAuthProvider carries the team sign-in for the #panel page; visitors never sign in.
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
-import { ConvexProvider, ConvexReactClient, useQuery } from 'convex/react';
+import { ConvexAuthProvider } from '@convex-dev/auth/react';
+import { ConvexReactClient, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { properties as samples, type Property } from '../data/properties';
 
 const url = import.meta.env.VITE_CONVEX_URL as string | undefined;
 const convex = url ? new ConvexReactClient(url) : null;
+export const hasDatabase = convex !== null;
 
 type Data = {
   properties: Property[];
@@ -37,9 +40,9 @@ function LiveData({ children }: { children: ReactNode }) {
 export function DataProvider({ children }: { children: ReactNode }) {
   if (!convex) return <DataCtx.Provider value={sampleData}>{children}</DataCtx.Provider>;
   return (
-    <ConvexProvider client={convex}>
+    <ConvexAuthProvider client={convex}>
       <LiveData>{children}</LiveData>
-    </ConvexProvider>
+    </ConvexAuthProvider>
   );
 }
 
