@@ -45,13 +45,15 @@ const terrain: TopoCenter[] = [
 
 type Props = {
   items: Property[];
+  /** Extra labelled dots that are not listings (for example, a project's location). */
+  points?: { id: string; label: string; lat: number; lng: number }[];
   active?: string | null;
   onHover?: (slug: string | null) => void;
   mini?: boolean;
   className?: string;
 };
 
-export function MapView({ items, active, onHover, mini, className }: Props) {
+export function MapView({ items, points = [], active, onHover, mini, className }: Props) {
   const { currency, rate } = useStore();
   const { navigate } = useRouter();
   const { lang, tx } = useLang();
@@ -97,6 +99,15 @@ export function MapView({ items, active, onHover, mini, className }: Props) {
           >
             {mini ? <span className="pin-dot" /> : moneyShort(p.priceUsd, currency, rate)}
           </button>
+        );
+      })}
+
+      {points.map(pt => {
+        const pos = project(pt.lat, pt.lng);
+        return (
+          <span key={pt.id} className="pin is-active map-point" style={{ left: `${pos.x}%`, top: `${pos.y}%`, zIndex: 30 }} role="img" aria-label={pt.label}>
+            <span className="pin-dot" />
+          </span>
         );
       })}
 

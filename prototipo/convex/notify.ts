@@ -12,6 +12,7 @@ import { emailEnabled, escapeHtml, sendEmail } from './mail';
 const interestLabel: Record<string, string> = {
   home: 'Comprar una casa',
   land: 'Comprar un lote o una finca',
+  presale: 'Proyecto en preventa',
   invest: 'Invertir / alquileres',
   sell: 'Vender su propiedad',
   build: 'Land & Build (maquinaria)',

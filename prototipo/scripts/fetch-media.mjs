@@ -1,8 +1,10 @@
 // Downloads the free stock media used by the prototype, optimizes it with sharp,
 // and writes src/data/media.json (sizes + blur placeholders) and CREDITS.md.
-// Usage: node scripts/fetch-media.mjs
+// Files already in public/media are kept; only new entries are downloaded.
+// Usage: node scripts/fetch-media.mjs            (add --force to download everything again)
 import sharp from 'sharp';
-import { mkdir, writeFile, stat } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, stat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 const root = new URL('../', import.meta.url);
 const outDir = new URL('public/media/', root);
@@ -10,6 +12,7 @@ await mkdir(outDir, { recursive: true });
 await mkdir(new URL('src/data/', root), { recursive: true });
 
 const U = (path, id, author) => ({ src: `https://images.unsplash.com/${path}?w=2400&q=85&fm=jpg`, page: `https://unsplash.com/photos/${id}`, author, license: 'Unsplash License' });
+const P = (id, author) => ({ src: `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=2400`, page: `https://www.pexels.com/photo/${id}/`, author, license: 'Pexels License' });
 
 // name -> source. Width is the max output width in px.
 const images = {
@@ -70,6 +73,19 @@ const images = {
   'eq-roller': [U('photo-1779384316974-7424be132379', '-uim3LxFj4A', 'Evan Porter'), 1400],
   'earthworks-aerial': [U('photo-1748848436533-f7583dce22b6', 'FeO9AixmDt0', 'Iain'), 1800],
   'aggregates': [U('photo-1779775981174-475ffb8ecf83', 'ugx4f5qGW3c', 'Sergej'), 1400],
+  // Projects and pre-sales (Pexels)
+  'proj-structure': [P(35886613, 'Gülru Sude'), 1800],
+  'proj-rebar': [P(40242407, 'Yara Solis Fuentes'), 1800],
+  'proj-crew': [P(29083058, 'Mario Spencer'), 1800],
+  'proj-foundation': [P(29735767, 'Rodolfo Gaion'), 1600],
+  'proj-terraces': [P(20159486, 'Jakub Pabis'), 1800],
+  'proj-condo-palms': [P(38324389, 'Zak Mogel'), 1600],
+  'proj-new-street': [P(34973974, 'Kushie In Vietnam'), 1800],
+  'proj-community-aerial': [P(6875496, 'Quang Nguyen Vinh'), 2000],
+  'proj-hillside-house': [P(7501130, 'Gustavo Galeano Maz'), 1800],
+  'proj-tropical-house': [P(30242715, 'Talha Resitoglu'), 1800],
+  'proj-pool': [P(32509620, 'Alejandro Orozco'), 1800],
+  'proj-model-living': [P(8900181, 'Zack Tu Nan'), 1600],
   // Hero video poster (first frame of the Pexels clip)
   'hero-poster': [{ src: 'https://images.pexels.com/videos/35177375/alajuela-costa-rica-35177375.jpeg?auto=compress&cs=tinysrgb&w=2000', page: 'https://www.pexels.com/video/aerial-view-of-lush-alajuela-landscape-in-daylight-35177375/', author: 'Arturo Salas', license: 'Pexels License' }, 2000],
 };
@@ -90,10 +106,20 @@ async function get(url) {
   }
 }
 
+const force = process.argv.includes('--force');
+const manifestUrl = new URL('src/data/media.json', root);
+const previous = existsSync(manifestUrl) ? JSON.parse(await readFile(manifestUrl, 'utf8')) : {};
 const manifest = {};
 const credits = [];
+// Reuse an asset that is already downloaded (same manifest entry and file on disk).
+const have = name => !force && previous[name] && existsSync(new URL(previous[name].src.replace('media/', ''), outDir));
 
 async function processImage(name, meta, maxW, quality = 74) {
+  if (have(name)) {
+    manifest[name] = previous[name];
+    credits.push(`| ${name} | ${meta.author} | [${meta.license}](${meta.page}) |`);
+    return;
+  }
   const buf = await get(meta.src);
   const img = sharp(buf).rotate().resize({ width: maxW, withoutEnlargement: true });
   const { data, info } = await img.webp({ quality }).toBuffer({ resolveWithObject: true });
@@ -109,19 +135,24 @@ for (let i = 0; i < entries.length; i += 6) {
   await Promise.all(entries.slice(i, i + 6).map(([name, [meta, w]]) => processImage(name, meta, w)));
 }
 for (const [name, meta] of Object.entries(panoramas)) {
+  credits.push(`| ${name} | ${meta.author} | [${meta.license}](${meta.page}) |`);
+  if (have(name)) { manifest[name] = previous[name]; continue; }
   const buf = await get(meta.src);
   const data = await sharp(buf).resize(4096, 2048).webp({ quality: 80 }).toBuffer();
   await writeFile(new URL(`${name}.webp`, outDir), data);
   manifest[name] = { src: `media/${name}.webp`, w: 4096, h: 2048, blur: '' };
-  credits.push(`| ${name} | ${meta.author} | [${meta.license}](${meta.page}) |`);
   console.log('ok', name, Math.round(data.length / 1024) + 'KB');
 }
-const vbuf = await get(video.src);
-await writeFile(new URL(video.name, outDir), vbuf);
-manifest.heroVideo = { src: `media/${video.name}`, w: 1920, h: 1080, blur: '' };
 credits.push(`| ${video.name} | ${video.author} | [${video.license}](${video.page}) |`);
-console.log('ok', video.name, Math.round((await stat(new URL(video.name, outDir))).size / 1024) + 'KB');
+if (have('heroVideo')) {
+  manifest.heroVideo = previous.heroVideo;
+} else {
+  const vbuf = await get(video.src);
+  await writeFile(new URL(video.name, outDir), vbuf);
+  manifest.heroVideo = { src: `media/${video.name}`, w: 1920, h: 1080, blur: '' };
+  console.log('ok', video.name, Math.round((await stat(new URL(video.name, outDir))).size / 1024) + 'KB');
+}
 
-await writeFile(new URL('src/data/media.json', root), JSON.stringify(manifest, null, 1));
+await writeFile(manifestUrl, JSON.stringify(manifest, null, 1));
 await writeFile(new URL('CREDITS.md', root), `# Media credits\n\nFree stock media used in the prototype. Replace with the company's own photography before launch.\n\n| File | Author | License / source |\n|---|---|---|\n${credits.join('\n')}\n`);
 console.log('done:', Object.keys(manifest).length, 'assets');

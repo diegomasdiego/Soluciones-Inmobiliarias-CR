@@ -29,10 +29,11 @@ export function Header() {
   const { tx } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const overDark = (route.name === 'home' || route.name === 'build') && !scrolled && !open;
+  const overDark = ['home', 'build', 'projects', 'project'].includes(route.name) && !scrolled && !open;
 
   const nav: { label: string; to: Route }[] = [
     { label: tx('Buy', 'Comprar'), to: { name: 'search' } },
+    { label: tx('Pre-sales', 'Preventas'), to: { name: 'projects' } },
     { label: 'Land & Build', to: { name: 'build' } },
     { label: tx('True cost', 'Costo real'), to: { name: 'calculator' } },
     { label: tx('Contact', 'Contacto'), to: { name: 'contact' } },
@@ -52,7 +53,7 @@ export function Header() {
         <Link to={{ name: 'home' }} className="header-logo" aria-label={tx('Soluciones Inmobiliarias CR, home', 'Soluciones Inmobiliarias CR, inicio')}><Logo /></Link>
         <nav className="header-nav" aria-label={tx('Main', 'Principal')}>
           {nav.map(n => (
-            <Link key={n.to.name} to={n.to} className={`nav-link ${route.name === n.to.name ? 'is-current' : ''}`} aria-current={route.name === n.to.name ? 'page' : undefined}>
+            <Link key={n.to.name} to={n.to} className={`nav-link ${route.name === n.to.name || (n.to.name === 'projects' && route.name === 'project') ? 'is-current' : ''}`} aria-current={route.name === n.to.name ? 'page' : undefined}>
               {n.label}
             </Link>
           ))}
@@ -110,6 +111,7 @@ export function Footer() {
         <div>
           <h4>{tx('Explore', 'Explorar')}</h4>
           <Link to={{ name: 'search' }}>{tx('Properties for sale', 'Propiedades en venta')}</Link>
+          <Link to={{ name: 'projects' }}>{tx('Projects & pre-sales', 'Proyectos y preventas')}</Link>
           <Link to={{ name: 'build' }}>Land &amp; Build</Link>
           <Link to={{ name: 'calculator' }}>{tx('True-cost calculator', 'Calculadora de costo real')}</Link>
           <Link to={{ name: 'contact' }}>{tx('Contact', 'Contacto')}</Link>

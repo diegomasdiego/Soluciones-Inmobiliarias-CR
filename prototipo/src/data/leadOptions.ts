@@ -1,9 +1,10 @@
 // Choices in the request forms. Shared by the forms and the team panel so both use the same labels.
-export type InterestId = 'home' | 'land' | 'invest' | 'sell' | 'build' | 'other';
+export type InterestId = 'home' | 'land' | 'presale' | 'invest' | 'sell' | 'build' | 'other';
 
 export const interests: { id: InterestId; en: string; es: string }[] = [
   { id: 'home', en: 'Buying a home', es: 'Comprar una casa' },
   { id: 'land', en: 'Buying land or a farm', es: 'Comprar un lote o una finca' },
+  { id: 'presale', en: 'A pre-sale project', es: 'Un proyecto en preventa' },
   { id: 'invest', en: 'Investing / rentals', es: 'Invertir / alquileres' },
   { id: 'sell', en: 'Selling my property', es: 'Vender mi propiedad' },
   { id: 'build', en: 'Land & Build (machinery)', es: 'Land & Build (maquinaria)' },

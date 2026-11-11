@@ -18,6 +18,8 @@ import { MapView } from '../components/MapView';
 import { Pano360 } from '../components/Pano360';
 import { Badges, Facts, PropertyCard } from '../components/PropertyCard';
 import { FloorPlan, Lightbox, VerifiedPanel } from '../components/PropertyParts';
+import { pctLabel } from '../components/ProjectParts';
+import { projectForProperty } from '../data/projects';
 
 function NotFound() {
   const { tx } = useLang();
@@ -61,6 +63,7 @@ function PropertyView({ raw }: { raw: P }) {
   ], [tx]);
 
   const advisor = advisors[p.advisor];
+  const project = projectForProperty(p.slug);
   const { propertyTax, insurance } = yearlyHolding(p.priceUsd);
   const monthly = p.hoaUsd + propertyTax / 12 + insurance / 12;
   const closing = sum(closingCosts(p.priceUsd, { residency: isResidencyEligible(p), split: false }, lang));
@@ -145,6 +148,20 @@ function PropertyView({ raw }: { raw: P }) {
               )}</figcaption>
             </figure>
           </section>
+
+          {project && (
+            <section className="prop-sec build-callout">
+              <IconPlan size={28} />
+              <div>
+                <h2 className="h3">{tx('Follow the build and see the payment plan', 'Siga la obra y vea el plan de pagos')}</h2>
+                <p>{tx(
+                  `${project.name} is ${pctLabel(project.progress, lang)} built. The project page shows each unit type with its plan, the milestones and what you pay at each one.`,
+                  `${project.name} lleva un ${pctLabel(project.progress, lang)} de avance. La página del proyecto muestra cada tipología con su plano, los hitos de obra y lo que se paga en cada uno.`,
+                )}</p>
+                <Link to={{ name: 'project', slug: project.slug }} className="link-btn">{tx('See the project', 'Ver el proyecto')} <IconArrow size={16} /></Link>
+              </div>
+            </section>
+          )}
 
           {p.tour && (
             <section ref={refs.tour} className="prop-sec">

@@ -10,7 +10,7 @@ npm run dev        # servidor local en http://localhost:5173
 npm run typecheck  # verificación de tipos
 npm run build      # build de producción en dist/
 npm run artifact   # build + página única en artifact/ (para publicar como link)
-npm run media      # vuelve a descargar y optimizar fotos y video (ver CREDITS.md)
+npm run media      # descarga y optimiza las fotos y el video nuevos (los ya descargados se conservan; --force para todo) y regenera CREDITS.md
 npm run logo       # vectoriza ../logo.JPG (logo del cliente) en src/data/logo.ts
 npm run brand      # regenera favicon, íconos, imagen para compartir y archivos de marca (brand/)
 ```
@@ -107,6 +107,8 @@ El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con
 | `#search` | Listado con filtros y mapa ilustrado sincronizados |
 | `#property-<slug>` | Ficha: galería, tour 360°, plano interactivo, ubicación, costos, rentabilidad, estado legal, solicitud de visita |
 | `#calculator` / `#calculator-<slug>` | Calculadora de costo real: cierre, hipoteca, impuestos, residencia (Ley 9996), rentabilidad |
+| `#projects` | Proyectos y preventas: proyectos por etapa (lanzamiento, en construcción, entregados), cómo funciona una preventa, lista de espera |
+| `#project-<slug>` | Ficha de proyecto: avance de obra por hitos, tipologías con plano (o diagrama del lote), plan de pagos ligado a los hitos, ubicación, solicitud de lista de precios |
 | `#build` | Land & Build: servicios, flota, proceso, estimador de viajes de vagoneta, cotización |
 | `#contact` | Contacto |
 | `#panel` | Panel privado del equipo (solicitudes) |
@@ -115,7 +117,7 @@ El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con
 
 ```
 src/
-  data/        properties.ts (11 propiedades de ejemplo), company.ts (zonas, asesores, maquinaria), media.json (generado)
+  data/        properties.ts (11 propiedades de ejemplo), projects.ts (5 proyectos y el cálculo del plan de pagos), company.ts (zonas, asesores, maquinaria), leadOptions.ts (opciones de los formularios), media.json (generado)
   lib/         router (hash + View Transitions), store (moneda, favoritos, búsqueda), search (parser de lenguaje natural), costs (modelo de costos CR)
   components/  piezas reutilizables: tarjeta, mapa, 360°, plano, galería, formulario, cursor, curvas de nivel
   pages/       una por pantalla
@@ -127,6 +129,7 @@ public/media/  fotos (webp), panorámicas 360° y video
 ## Qué está simulado
 
 - **Datos:** propiedades, cifras de la empresa, testimonios, números de folio y plano son de ejemplo.
+- **Proyectos y preventas:** los 5 proyectos, sus precios, fechas, avance e informes de obra son ficticios y viven en `src/data/projects.ts` (no en Convex). El plan de pagos sigue un esquema común de preventa (reserva, 10–20% al firmar, pagos por hito y saldo contra entrega). Los hitos ya cumplidos se cobran al firmar. Las menciones a escrow y retiros deben pasar por la revisión legal (COD-9).
 - **Buscador "IA":** es un parser por reglas (`src/lib/search.ts`) que entiende inglés y español. En producción se reemplaza por un modelo de lenguaje con el mismo contrato (`texto → filtros + explicación`).
 - **Formularios:** guardan la solicitud en Convex y avisan por correo cuando Resend está configurado. En el artifact (sin base de datos) solo validan.
 - **Mapa:** ilustrado, con posiciones aproximadas. Para producción se recomienda MapLibre con teselas reales.
