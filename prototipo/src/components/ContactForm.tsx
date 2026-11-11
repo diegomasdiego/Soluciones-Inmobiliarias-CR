@@ -26,6 +26,8 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
   const [status, setStatus] = useState<'idle' | 'sending' | 'saved' | 'offline' | 'error' | 'rate'>('idle');
   const honeypot = useRef<HTMLInputElement>(null);
   const done = status === 'saved' || status === 'offline';
+  // Sellers don't have a budget; they tell us about the property instead.
+  const selling = values.interest === 'sell';
 
   const set = (k: keyof typeof values, v: string) => {
     setValues(s => ({ ...s, [k]: v }));
@@ -52,7 +54,7 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
         email: values.email,
         phone: values.phone || undefined,
         interest: values.interest,
-        budget: values.budget || undefined,
+        budget: selling ? undefined : values.budget || undefined,
         message: values.message || undefined,
         via: values.via,
         context,
@@ -122,7 +124,7 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
                 </div>
               </div>
             )}
-            {!compact && (
+            {!compact && !selling && (
               <div className="field">
                 <label htmlFor={`${uid}-budget`}>{tx('Budget', 'Presupuesto')} <span className="optional">· {tx('optional', 'opcional')}</span></label>
                 <select id={`${uid}-budget`} value={values.budget} onChange={e => set('budget', e.target.value)}>
@@ -140,7 +142,9 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
                 onChange={e => set('message', e.target.value)}
                 aria-invalid={!!errors.message}
                 aria-describedby={errors.message ? `${uid}-message-err` : undefined}
-                placeholder={tx('Dates you can visit, questions about the property, your timeline…', 'Fechas en que puede visitar, preguntas sobre la propiedad, sus plazos…')}
+                placeholder={selling
+                  ? tx('Where the property is, its size, and when you would like to sell…', 'Dónde está la propiedad, su tamaño y cuándo le gustaría vender…')
+                  : tx('Dates you can visit, questions about the property, your timeline…', 'Fechas en que puede visitar, preguntas sobre la propiedad, sus plazos…')}
               />
               {errors.message && <span className="field-error" id={`${uid}-message-err`}>{errors.message}</span>}
             </div>

@@ -4,7 +4,7 @@ import { company, equipment, testimonials, zones, type Zone } from '../data/comp
 import { RESIDENCY_MIN_USD, type Property } from '../data/properties';
 import { useProperties } from '../lib/data';
 import { closingCosts, sum, yearlyHolding } from '../lib/costs';
-import { money } from '../lib/format';
+import { money, usdRange } from '../lib/format';
 import { pick, useLang } from '../lib/i18n';
 import { mediaUrl } from '../lib/media';
 import { Link, useRouter } from '../lib/router';
@@ -144,7 +144,7 @@ function ZoneStep({ z, onActive, count }: { z: Zone; onActive: () => void; count
       <p className="zone-tagline">{pick(z.tagline, lang)}</p>
       <p className="zone-body">{pick(z.body, lang)}</p>
       <dl className="zone-stats">
-        <div><dt>{tx('Price per m² built', 'Precio por m² construido')}</dt><dd>{z.pricePerM2}{z.estimate && <sup>*</sup>}</dd></div>
+        <div><dt>{tx('Price per m² built', 'Precio por m² construido')}</dt><dd>{usdRange(z.builtUsdM2)}{z.estimate && <sup>*</sup>}</dd></div>
         <div><dt>{tx('Appreciation', 'Plusvalía')}</dt><dd>{pick(z.growth, lang)}</dd></div>
         <div><dt>{tx('To SJO airport', 'Al aeropuerto SJO')}</dt><dd>{z.toAirport}</dd></div>
         <div><dt>{tx('Listings now', 'Propiedades hoy')}</dt><dd>{count}</dd></div>
@@ -321,6 +321,29 @@ function Testimonials() {
   );
 }
 
+function SellTeaser() {
+  const { lang, tx } = useLang();
+  return (
+    <section className="section sell-teaser">
+      <div className="wrap sell-teaser-grid">
+        <Reveal className="sell-teaser-img"><Img name="sell-shoot" alt={tx('Photographer setting up a camera on a tripod in a living room', 'Fotógrafo colocando una cámara en un trípode en una sala')} /></Reveal>
+        <Reveal className="sell-teaser-copy" delay={0.08}>
+          <p className="eyebrow">{tx('Selling?', '¿Va a vender?')}</p>
+          <h2 className="h2">{tx('See what your property is worth.', 'Vea cuánto vale su propiedad.')}</h2>
+          <p className="lead">{tx(
+            'A free estimate by area and size, then a title check, photos, drone video and buyers from abroad when you list with us.',
+            'Una estimación gratuita por zona y tamaño, y al vender con nosotros: estudio registral, fotos, video con dron y compradores del exterior.',
+          )}</p>
+          <ul className="sell-teaser-ranges" aria-label={tx('Price per m² built by area', 'Precio por m² construido por zona')}>
+            {zones.map(z => <li key={z.photo}><span>{pick(z.name, lang)}</span><span className="mono">{usdRange(z.builtUsdM2)}/m²</span></li>)}
+          </ul>
+          <Link to={{ name: 'sell' }} className="btn btn-accent">{tx('Get a free estimate', 'Obtener una estimación gratis')} <IconArrow size={18} /></Link>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 function Cta() {
   const { lang, tx } = useLang();
   return (
@@ -352,6 +375,7 @@ export default function Home() {
       <CostTeaser />
       <BuildTeaser />
       <Testimonials />
+      <SellTeaser />
       <Cta />
     </>
   );

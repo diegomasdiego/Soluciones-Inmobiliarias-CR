@@ -13,6 +13,7 @@ import Build from './pages/Build';
 import Contact from './pages/Contact';
 import Projects from './pages/Projects';
 import Project from './pages/Project';
+import Sell from './pages/Sell';
 
 // Team panel: its own chunk, so visitors never download it.
 const Panel = lazy(() => import('./pages/Panel'));
@@ -27,6 +28,7 @@ function Page() {
     case 'contact': return <Contact topic={route.topic} />;
     case 'projects': return <Projects />;
     case 'project': return <Project slug={route.slug} />;
+    case 'sell': return <Sell />;
     default: return <Home />;
   }
 }

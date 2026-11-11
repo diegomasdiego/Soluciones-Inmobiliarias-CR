@@ -19,6 +19,8 @@ export function moneyShort(amountUsd: number, currency: Currency, rate: number):
 export const m2 = (v: number) => `${num.format(v)} m²`;
 export const pct = (v: number, digits = 1) => `${(v * 100).toFixed(digits)}%`;
 export const int = (v: number) => num.format(Math.round(v));
+/** "$1,500–2,500" */
+export const usdRange = ([lo, hi]: readonly [number, number]) => `$${num.format(lo)}–${num.format(hi)}`;
 
 export function formatDate(iso: string, lang: 'en' | 'es' = 'en'): string {
   const d = new Date(iso + 'T12:00:00');

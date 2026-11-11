@@ -59,18 +59,21 @@ Free stock media used in the prototype. Replace with the company's own photograp
 | earthworks-aerial | Iain | [Unsplash License](https://unsplash.com/photos/FeO9AixmDt0) |
 | aggregates | Sergej | [Unsplash License](https://unsplash.com/photos/ugx4f5qGW3c) |
 | proj-structure | Gülru Sude | [Pexels License](https://www.pexels.com/photo/35886613/) |
-| proj-condo-palms | Zak Mogel | [Pexels License](https://www.pexels.com/photo/38324389/) |
 | proj-rebar | Yara Solis Fuentes | [Pexels License](https://www.pexels.com/photo/40242407/) |
 | proj-crew | Mario Spencer | [Pexels License](https://www.pexels.com/photo/29083058/) |
 | proj-foundation | Rodolfo Gaion | [Pexels License](https://www.pexels.com/photo/29735767/) |
 | proj-terraces | Jakub Pabis | [Pexels License](https://www.pexels.com/photo/20159486/) |
-| proj-hillside-house | Gustavo Galeano Maz | [Pexels License](https://www.pexels.com/photo/7501130/) |
+| proj-condo-palms | Zak Mogel | [Pexels License](https://www.pexels.com/photo/38324389/) |
+| proj-new-street | Kushie In Vietnam | [Pexels License](https://www.pexels.com/photo/34973974/) |
 | proj-community-aerial | Quang Nguyen Vinh | [Pexels License](https://www.pexels.com/photo/6875496/) |
+| proj-hillside-house | Gustavo Galeano Maz | [Pexels License](https://www.pexels.com/photo/7501130/) |
+| proj-tropical-house | Talha Resitoglu | [Pexels License](https://www.pexels.com/photo/30242715/) |
 | proj-pool | Alejandro Orozco | [Pexels License](https://www.pexels.com/photo/32509620/) |
 | proj-model-living | Zack Tu Nan | [Pexels License](https://www.pexels.com/photo/8900181/) |
-| proj-tropical-house | Talha Resitoglu | [Pexels License](https://www.pexels.com/photo/30242715/) |
-| proj-new-street | Kushie In Vietnam | [Pexels License](https://www.pexels.com/photo/34973974/) |
 | hero-poster | Arturo Salas | [Pexels License](https://www.pexels.com/video/aerial-view-of-lush-alajuela-landscape-in-daylight-35177375/) |
+| sell-visit | Vitaly Gariev | [Pexels License](https://www.pexels.com/photo/23224999/) |
+| sell-shoot | Vitaly Gariev | [Pexels License](https://www.pexels.com/photo/23224703/) |
+| sell-hero | Vero Benedini | [Pexels License](https://www.pexels.com/photo/28915352/) |
 | pano-living | Poly Haven | [CC0](https://polyhaven.com/a/cayley_interior) |
 | pano-terrace | Poly Haven | [CC0](https://polyhaven.com/a/veranda) |
 | hero.mp4 | Arturo Salas | [Pexels License](https://www.pexels.com/video/aerial-view-of-lush-alajuela-landscape-in-daylight-35177375/) |

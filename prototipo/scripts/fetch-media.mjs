@@ -86,6 +86,10 @@ const images = {
   'proj-tropical-house': [P(30242715, 'Talha Resitoglu'), 1800],
   'proj-pool': [P(32509620, 'Alejandro Orozco'), 1800],
   'proj-model-living': [P(8900181, 'Zack Tu Nan'), 1600],
+  // Sell with us (#sell)
+  'sell-hero': [P(28915352, 'Vero Benedini'), 2000],
+  'sell-shoot': [P(23224703, 'Vitaly Gariev'), 1600],
+  'sell-visit': [P(23224999, 'Vitaly Gariev'), 1600],
   // Hero video poster (first frame of the Pexels clip)
   'hero-poster': [{ src: 'https://images.pexels.com/videos/35177375/alajuela-costa-rica-35177375.jpeg?auto=compress&cs=tinysrgb&w=2000', page: 'https://www.pexels.com/video/aerial-view-of-lush-alajuela-landscape-in-daylight-35177375/', author: 'Arturo Salas', license: 'Pexels License' }, 2000],
 };

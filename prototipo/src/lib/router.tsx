@@ -13,12 +13,14 @@ export type Route =
   | { name: 'contact'; topic?: string }
   | { name: 'projects' }
   | { name: 'project'; slug: string }
+  | { name: 'sell' }
   | { name: 'panel' };
 
 export function parseHash(hash: string): Route {
   const h = decodeURIComponent(hash.replace(/^#/, ''));
   if (h === 'panel') return { name: 'panel' };
   if (h === 'projects') return { name: 'projects' };
+  if (h === 'sell') return { name: 'sell' };
   if (h.startsWith('project-')) return { name: 'project', slug: h.slice(8) };
   if (h === 'search') return { name: 'search' };
   if (h.startsWith('property-')) return { name: 'property', slug: h.slice(9) };
@@ -40,6 +42,7 @@ export function toHash(r: Route): string {
     case 'contact': return r.topic ? `contact-${r.topic}` : 'contact';
     case 'projects': return 'projects';
     case 'project': return `project-${r.slug}`;
+    case 'sell': return 'sell';
     case 'panel': return 'panel';
   }
 }

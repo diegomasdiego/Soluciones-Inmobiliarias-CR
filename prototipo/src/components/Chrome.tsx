@@ -29,10 +29,11 @@ export function Header() {
   const { tx } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const overDark = ['home', 'build', 'projects', 'project'].includes(route.name) && !scrolled && !open;
+  const overDark = ['home', 'build', 'projects', 'project', 'sell'].includes(route.name) && !scrolled && !open;
 
   const nav: { label: string; to: Route }[] = [
     { label: tx('Buy', 'Comprar'), to: { name: 'search' } },
+    { label: tx('Sell', 'Vender'), to: { name: 'sell' } },
     { label: tx('Pre-sales', 'Preventas'), to: { name: 'projects' } },
     { label: 'Land & Build', to: { name: 'build' } },
     { label: tx('True cost', 'Costo real'), to: { name: 'calculator' } },
@@ -112,6 +113,7 @@ export function Footer() {
           <h4>{tx('Explore', 'Explorar')}</h4>
           <Link to={{ name: 'search' }}>{tx('Properties for sale', 'Propiedades en venta')}</Link>
           <Link to={{ name: 'projects' }}>{tx('Projects & pre-sales', 'Proyectos y preventas')}</Link>
+          <Link to={{ name: 'sell' }}>{tx('Sell your property', 'Venda su propiedad')}</Link>
           <Link to={{ name: 'build' }}>Land &amp; Build</Link>
           <Link to={{ name: 'calculator' }}>{tx('True-cost calculator', 'Calculadora de costo real')}</Link>
           <Link to={{ name: 'contact' }}>{tx('Contact', 'Contacto')}</Link>

@@ -329,12 +329,6 @@
   "h": 1200,
   "blur": "data:image/webp;base64,UklGRsIAAABXRUJQVlA4ILYAAABQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbACdMoAlqRMuyIvOLK+EM1mAAN97qVmnBdVIPupjpzsIChoDI2vtbJ7hhiemkOjQDtLViye9M9C3L9MSdCi3GFnd6+aakvxUrrjd4ffSRF49L73IP/oFOZDW1KeukP5yUQ0iMHTVkuQTcnGH8fpK74ZF7/Jdg/7YOwOnS8WA+fPZVt0vGZoSwcI7JfgNgO4Uljvphk8OFkP1qwAAAA=="
  },
- "proj-condo-palms": {
-  "src": "media/proj-condo-palms.webp",
-  "w": 1600,
-  "h": 2400,
-  "blur": "data:image/webp;base64,UklGRiwBAABXRUJQVlA4ICABAADQBgCdASoYACQAPu1ur1GppiQipWsxMB2JQBZZ5YJ0Ih3/kzMv6BvxMVGmi2G8G83ppXGwnLP97e909lsGPFAA/u5Tl1zY8xN4n220dl9HJBB1w3NvHYGLLhiAA+DQplWzXol3hAYQ9b2ttJttmCttD6XSTU+oM3Czdg14qd7ugBb1Yf52ZIa157r+4qjr5g5QLUBXFRhZSjFgLEyvcx5Mp/sKKWCo3l04oJYJw1Ymn6N5UQqhOygZIVjb4pQYX8h+c98P9oSQlIPeV/dbB1TlqwuUqXVdceDa9SrAXlh9AGwzzB+LpkHJ+FyKUh3yN65j5SJNgXUHaxMC72ymd5rYwpb3XDFK1zsZ9Hpcngn3w/+yoq9jQS55BEDQukBgAAA="
- },
  "proj-rebar": {
   "src": "media/proj-rebar.webp",
   "w": 1800,
@@ -359,17 +353,35 @@
   "h": 2250,
   "blur": "data:image/webp;base64,UklGRtwAAABXRUJQVlA4INAAAAAwBgCdASoYAB4APt1cpE2opaOiN/qoARAbiWwAnS/V1gML/G8APGwsAwqUSAoFhHWLnPRyMqtMsiqoAP4T4oibdwSBsuqNyMvuMhmAYsYAvgCM9Gp+LongaZa7+ipS3r6veVroUOmHRSxIcvDzYVWhJus6Z0M7LpZvRaF7h+58dG4nl05HFa8g7ztdv6VyjEC3qho2C7xrgh1XhubKK/KLd4+jXkVW5UnWM7jepcWofVtCM6fFNHXft+oUAw3ZU5wsASgijoWWGmnAf4V7BxgA"
  },
- "proj-hillside-house": {
-  "src": "media/proj-hillside-house.webp",
+ "proj-condo-palms": {
+  "src": "media/proj-condo-palms.webp",
+  "w": 1600,
+  "h": 2400,
+  "blur": "data:image/webp;base64,UklGRiwBAABXRUJQVlA4ICABAADQBgCdASoYACQAPu1ur1GppiQipWsxMB2JQBZZ5YJ0Ih3/kzMv6BvxMVGmi2G8G83ppXGwnLP97e909lsGPFAA/u5Tl1zY8xN4n220dl9HJBB1w3NvHYGLLhiAA+DQplWzXol3hAYQ9b2ttJttmCttD6XSTU+oM3Czdg14qd7ugBb1Yf52ZIa157r+4qjr5g5QLUBXFRhZSjFgLEyvcx5Mp/sKKWCo3l04oJYJw1Ymn6N5UQqhOygZIVjb4pQYX8h+c98P9oSQlIPeV/dbB1TlqwuUqXVdceDa9SrAXlh9AGwzzB+LpkHJ+FyKUh3yN65j5SJNgXUHaxMC72ymd5rYwpb3XDFK1zsZ9Hpcngn3w/+yoq9jQS55BEDQukBgAAA="
+ },
+ "proj-new-street": {
+  "src": "media/proj-new-street.webp",
   "w": 1800,
-  "h": 1201,
-  "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAACwAwCdASoYABAAPu1iqU2ppaOiMAgBMB2JbAC/OBuvtwdYkanygAD946zYpjU2E45aKQs4kKumng/h+Zn5ItoKAFdcBhIDcolAMABrDxOzUx2LuQGd1bgwI3C++1IsbLqmepNKRa5CFblu2NOXaBNmCtaa8JThPpD1yfPsor4yi7XXKPH3u2BbBBcd95blBhWVsFAA"
+  "h": 1350,
+  "blur": "data:image/webp;base64,UklGRsgAAABXRUJQVlA4ILwAAADQBACdASoYABIAPu1ur1KppiQiqAgBMB2JQBdgAX05YSnNqB13lcsegYEHHFYawADJY2bKRu14wGLiuk4aSe9JRgxdwJMSOB3GjLN/m0gQQgvstEYCoMsbIizxN9XD5jFFpZxnp3lI8wuNS0wSwO2ZVA8HJfUHtPg0U6YeyAm+3+joqlHDt2hZWIO2I/Bn9ryGXS9MB78tWw0P0KM+91BYhCKL2NVTz3ujv+DfXiiSz/Bvq7C1ihZIMAAAAA=="
  },
  "proj-community-aerial": {
   "src": "media/proj-community-aerial.webp",
   "w": 2000,
   "h": 1500,
   "blur": "data:image/webp;base64,UklGRr4AAABXRUJQVlA4ILIAAAAQBQCdASoYABIAPu1oqk+ppaOiKA1RMB2JYgC1CTYBhFovTgu8rpdeQp1tzKoVHPwAAP7nprUmYKHtCD2Zl2HCKnPnXp+gvmJCNOp4KROS+PScGq7VLAyJZsf3brtZOxQOdSBl8hzHVir5H7eB0Js5izLZcy5YHWUxYIvUj1geTy8KQFaN+X+Aje8zxEX5FvqkkUfXWUWeAgpOLndIIlftzeaVhquIaqmGSaymS0cbgAAA"
+ },
+ "proj-hillside-house": {
+  "src": "media/proj-hillside-house.webp",
+  "w": 1800,
+  "h": 1201,
+  "blur": "data:image/webp;base64,UklGRqAAAABXRUJQVlA4IJQAAACwAwCdASoYABAAPu1iqU2ppaOiMAgBMB2JbAC/OBuvtwdYkanygAD946zYpjU2E45aKQs4kKumng/h+Zn5ItoKAFdcBhIDcolAMABrDxOzUx2LuQGd1bgwI3C++1IsbLqmepNKRa5CFblu2NOXaBNmCtaa8JThPpD1yfPsor4yi7XXKPH3u2BbBBcd95blBhWVsFAA"
+ },
+ "proj-tropical-house": {
+  "src": "media/proj-tropical-house.webp",
+  "w": 1800,
+  "h": 1200,
+  "blur": "data:image/webp;base64,UklGRqIAAABXRUJQVlA4IJYAAAAwBACdASoYABAAPu1iqU2ppaQiMAgBMB2JZAC7ACHhGY7OFa8FEsNgsUAA/upwH6yg6dWKf1hg++5NgAPI81r9LsGQS3Geagl676zxxJK4xhH93a+DWpjDQQLIyvoB+40cOzaGX2cIBoMqkCuC66/9WE7+d/DxM6fBi5WgIReNVg8CeXSIPLA3AdIE8HbQqhtAzZQAAAA="
  },
  "proj-pool": {
   "src": "media/proj-pool.webp",
@@ -383,23 +395,29 @@
   "h": 1067,
   "blur": "data:image/webp;base64,UklGRroAAABXRUJQVlA4IK4AAACwBACdASoYABAAPu1iqU2ppaOiMAgBMB2JYwCuLf/t0A2ZKHwqcZoDL7bTYWqgAPjZ0nM1m0DYfPm+ju3gwwoUw3yCK6tgVehtVTic4wKgamdGUrYG92nMCvUSzEz/TnecRTYn6LeVvSEXWrGIUHtaJ5zpXqXdbmL8HeQSQzD7rbun/tL4rw/z+PxfY6KyQQ8v/eFLeLeXYvnXjVgcohn2H8SjEMqAscsCyPQD/AA="
  },
- "proj-tropical-house": {
-  "src": "media/proj-tropical-house.webp",
-  "w": 1800,
-  "h": 1200,
-  "blur": "data:image/webp;base64,UklGRqIAAABXRUJQVlA4IJYAAAAwBACdASoYABAAPu1iqU2ppaQiMAgBMB2JZAC7ACHhGY7OFa8FEsNgsUAA/upwH6yg6dWKf1hg++5NgAPI81r9LsGQS3Geagl676zxxJK4xhH93a+DWpjDQQLIyvoB+40cOzaGX2cIBoMqkCuC66/9WE7+d/DxM6fBi5WgIReNVg8CeXSIPLA3AdIE8HbQqhtAzZQAAAA="
- },
- "proj-new-street": {
-  "src": "media/proj-new-street.webp",
-  "w": 1800,
-  "h": 1350,
-  "blur": "data:image/webp;base64,UklGRsgAAABXRUJQVlA4ILwAAADQBACdASoYABIAPu1ur1KppiQiqAgBMB2JQBdgAX05YSnNqB13lcsegYEHHFYawADJY2bKRu14wGLiuk4aSe9JRgxdwJMSOB3GjLN/m0gQQgvstEYCoMsbIizxN9XD5jFFpZxnp3lI8wuNS0wSwO2ZVA8HJfUHtPg0U6YeyAm+3+joqlHDt2hZWIO2I/Bn9ryGXS9MB78tWw0P0KM+91BYhCKL2NVTz3ujv+DfXiiSz/Bvq7C1ihZIMAAAAA=="
- },
  "hero-poster": {
   "src": "media/hero-poster.webp",
   "w": 2000,
   "h": 1125,
   "blur": "data:image/webp;base64,UklGRngAAABXRUJQVlA4IGwAAAAQBACdASoYAA0APu1iqU2ppaOiMAgBMB2JYgCdIIpJ/gPPzC+eZjqD2AD8jYIov3NyGk0ahantvjmMA9/pp//I4j/0+Vzg/g8KYWmc9xPXvGd2DC6e9vw9eC9it5x2wwkdcUyYaaPxgmrEEAA="
+ },
+ "sell-visit": {
+  "src": "media/sell-visit.webp",
+  "w": 1600,
+  "h": 900,
+  "blur": "data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAADQAwCdASoYAA0APu1iqU2ppaOiMAgBMB2JYwAARqI4k/54g3p58VAA4gTyeHHyLPJMM+KoQI1t4dP6o5Xu2RBouS+VklVdjl2cK1xWf3UYouwaWvgFNYq5QaX2mYBNyh3J41CGiMD+1wj7qv3dssM1LKklyVfUt+ftakujxk3kK1DgAAA="
+ },
+ "sell-shoot": {
+  "src": "media/sell-shoot.webp",
+  "w": 1600,
+  "h": 900,
+  "blur": "data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAADwAwCdASoYAA0APu1iqU2ppaQiMAgBMB2JZwDG9BuJ6wzT9pm2n116APiwylgIzdgvy/b/u7C7qLlTXJs7Jpk/mn2AwhtHKLo5xhDt+MJhTrf1vmOi7vQAAtRebyVAyn9k0mgW6HLRr2B7DJRBfl5YkigAAA=="
+ },
+ "sell-hero": {
+  "src": "media/sell-hero.webp",
+  "w": 2000,
+  "h": 1334,
+  "blur": "data:image/webp;base64,UklGRqgAAABXRUJQVlA4IJwAAACQBACdASoYABAAPu1iqU2ppaOiMAgBMB2JbACsAywBP0kzlIisR8OrCrLPcMAA/ukGXUiy8eluIYjHsfCwKbCS3Cp0qf6EEThL3/DkIhbQCJGlqyy264pdF8lPPaAyfyp5A8LCbx/DOW37dsMOgz+U6f8IhhFrpcllMBQGePrR+nqn0y46ANB4ldZfo47AIBkjB13miOKrelMVwAA="
  },
  "pano-living": {
   "src": "media/pano-living.webp",

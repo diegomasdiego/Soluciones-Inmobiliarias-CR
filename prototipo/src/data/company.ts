@@ -33,14 +33,17 @@ export type Zone = {
   lng: number;
   tagline: L;
   body: L;
-  pricePerM2: string;
+  /** USD per m² built, low–high. */
+  builtUsdM2: [number, number];
+  /** USD per m² of land for lots up to 1 ha, low–high. Prototype estimate. */
+  landUsdM2: [number, number];
   growth: L;
   toAirport: string;
   estimate?: boolean;
 };
 
 // Price ranges for Escazú/Santa Ana and Heredia/Belén come from the 2026 market report the client shared.
-// The Alajuela range is an estimate for the prototype.
+// The Alajuela range is an estimate for the prototype, and so are all the land (lot) ranges.
 export const zones: Zone[] = [
   {
     area: ['Escazú'],
@@ -53,7 +56,8 @@ export const zones: Zone[] = [
       en: 'Hillside homes above the city, international schools and the Avenida Escazú corridor. Prices hold steady and demand from relocating families stays high.',
       es: 'Casas en las laderas sobre la ciudad, colegios internacionales y el corredor de Avenida Escazú. Los precios se mantienen estables y la demanda de familias que se mudan al país sigue alta.',
     },
-    pricePerM2: '$1,500–2,500',
+    builtUsdM2: [1500, 2500],
+    landUsdM2: [120, 350],
     growth: { en: '+4–7% a year', es: '+4–7% al año' },
     toAirport: '20–25 min',
   },
@@ -68,7 +72,8 @@ export const zones: Zone[] = [
       en: 'A drier, warmer microclimate, the Lindora business corridor and direct access to Ruta 27. West toward Ciudad Colón, larger lots and a slower pace.',
       es: 'Un microclima más seco y cálido, el corredor de negocios de Lindora y acceso directo a la Ruta 27. Hacia Ciudad Colón, lotes más grandes y un ritmo más tranquilo.',
     },
-    pricePerM2: '$1,500–2,500',
+    builtUsdM2: [1500, 2500],
+    landUsdM2: [80, 240],
     growth: { en: '+4–7% a year', es: '+4–7% al año' },
     toAirport: '18–22 min',
   },
@@ -83,7 +88,8 @@ export const zones: Zone[] = [
       en: 'University town energy, cool mornings in the hills and the free-trade zones of Belén. Strong demand from mid-to-upper income families keeps rentals full.',
       es: 'Ambiente universitario, mañanas frescas en los cerros y las zonas francas de Belén. La demanda de familias de ingresos medios y altos mantiene los alquileres ocupados.',
     },
-    pricePerM2: '$1,200–1,800',
+    builtUsdM2: [1200, 1800],
+    landUsdM2: [70, 200],
     growth: { en: '+5% a year', es: '+5% al año' },
     toAirport: '8–30 min',
   },
@@ -98,7 +104,8 @@ export const zones: Zone[] = [
       en: 'Farms and larger lots on the slopes toward Poás, with the whole valley below. The best value per square meter in our coverage area.',
       es: 'Fincas y lotes grandes en las faldas hacia el Poás, con todo el valle a sus pies. El mejor valor por metro cuadrado de nuestra zona de cobertura.',
     },
-    pricePerM2: '$900–1,400',
+    builtUsdM2: [900, 1400],
+    landUsdM2: [25, 110],
     growth: { en: '+4–6% a year', es: '+4–6% al año' },
     toAirport: '10–25 min',
     estimate: true,
@@ -123,7 +130,20 @@ export const testimonials: { quote: L; name: string; detail: L }[] = [
   },
 ];
 
-export type Equipment = { id: string; name: L; spec: L; use: L; billing: L; photo: string };
+export const sellerTestimonials: { quote: L; name: string; detail: L }[] = [
+  {
+    quote: { en: 'They found an old easement on our title before listing and had it cleared. The buyer’s lawyer signed off in a week.', es: 'Encontraron una servidumbre vieja en nuestro folio antes de publicar y la resolvieron. El abogado del comprador dio el visto bueno en una semana.' },
+    name: 'Marta y Rodrigo A.',
+    detail: { en: 'Sold their house in Santa Ana', es: 'Vendieron su casa en Santa Ana' },
+  },
+  {
+    quote: { en: 'I live in Toronto. The buyer toured my condo by video call and we closed with a power of attorney. I never had to fly down.', es: 'Vivo en Toronto. El comprador recorrió mi apartamento por videollamada y cerramos con un poder especial. Nunca tuve que viajar.' },
+    name: 'Daniel K.',
+    detail: { en: 'Sold a condo in Escazú from abroad', es: 'Vendió un apartamento en Escazú desde el exterior' },
+  },
+];
+
+export type Equipment ={ id: string; name: L; spec: L; use: L; billing: L; photo: string };
 export const equipment: Equipment[] = [
   {
     id: 'excavator', photo: 'eq-excavator',

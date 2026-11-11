@@ -109,6 +109,7 @@ El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con
 | `#calculator` / `#calculator-<slug>` | Calculadora de costo real: cierre, hipoteca, impuestos, residencia (Ley 9996), rentabilidad |
 | `#projects` | Proyectos y preventas: proyectos por etapa (lanzamiento, en construcción, entregados), cómo funciona una preventa, lista de espera |
 | `#project-<slug>` | Ficha de proyecto: avance de obra por hitos, tipologías con plano (o diagrama del lote), plan de pagos ligado a los hitos, ubicación, solicitud de lista de precios |
+| `#sell` | Vende con nosotros: por qué vender con la empresa, qué incluye cada ficha, estimador de valor por zona y m², proceso, documentos, cierre y solicitud de valoración (interés "Vender mi propiedad") |
 | `#build` | Land & Build: servicios, flota, proceso, estimador de viajes de vagoneta, cotización |
 | `#contact` | Contacto |
 | `#panel` | Panel privado del equipo (solicitudes) |
@@ -117,8 +118,8 @@ El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con
 
 ```
 src/
-  data/        properties.ts (11 propiedades de ejemplo), projects.ts (5 proyectos y el cálculo del plan de pagos), company.ts (zonas, asesores, maquinaria), leadOptions.ts (opciones de los formularios), media.json (generado)
-  lib/         router (hash + View Transitions), store (moneda, favoritos, búsqueda), search (parser de lenguaje natural), costs (modelo de costos CR)
+  data/        properties.ts (11 propiedades de ejemplo), projects.ts (5 proyectos y el cálculo del plan de pagos), company.ts (zonas con precio por m², asesores, maquinaria, testimonios), leadOptions.ts (opciones de los formularios), media.json (generado)
+  lib/         router (hash + View Transitions), store (moneda, favoritos, búsqueda), search (parser de lenguaje natural), costs (modelo de costos CR), valuation (estimador de valor para vendedores)
   components/  piezas reutilizables: tarjeta, mapa, 360°, plano, galería, formulario, cursor, curvas de nivel
   pages/       una por pantalla
   styles/      base.css (tokens), components.css, pages.css
@@ -130,6 +131,7 @@ public/media/  fotos (webp), panorámicas 360° y video
 
 - **Datos:** propiedades, cifras de la empresa, testimonios, números de folio y plano son de ejemplo.
 - **Proyectos y preventas:** los 5 proyectos, sus precios, fechas, avance e informes de obra son ficticios y viven en `src/data/projects.ts` (no en Convex). El plan de pagos sigue un esquema común de preventa (reserva, 10–20% al firmar, pagos por hito y saldo contra entrega). Los hitos ya cumplidos se cobran al firmar. Las menciones a escrow y retiros deben pasar por la revisión legal (COD-9).
+- **Vende con nosotros:** el estimador (`src/lib/valuation.ts`) ubica la propiedad dentro del rango de precio por m² de su zona (`company.ts`): construido para casas y apartamentos, de terreno para lotes de hasta 1 ha. Parte de un punto según el tipo y lo mueve por estado, tamaño, vista y piscina; muestra cada ajuste y compara con las propiedades publicadas de la misma zona. Los rangos de terrenos y el de Alajuela son estimaciones propias. Las cifras del encabezado (días hasta la oferta, % del precio pedido, compradores del exterior), los testimonios de vendedores y la política de comisión al cierre son de ejemplo y debe confirmarlos el cliente. La retención del 2%/2,5% y los documentos pedidos deben pasar por la revisión legal (COD-9).
 - **Buscador "IA":** es un parser por reglas (`src/lib/search.ts`) que entiende inglés y español. En producción se reemplaza por un modelo de lenguaje con el mismo contrato (`texto → filtros + explicación`).
 - **Formularios:** guardan la solicitud en Convex y avisan por correo cuando Resend está configurado. En el artifact (sin base de datos) solo validan.
 - **Mapa:** ilustrado, con posiciones aproximadas. Para producción se recomienda MapLibre con teselas reales.

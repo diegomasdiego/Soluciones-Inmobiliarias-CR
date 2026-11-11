@@ -1,0 +1,124 @@
+/* Sell with us (#sell): pillars, listing kit, valuation, process, documents, owner quotes. */
+.sell-hero .build-hero-inner { padding-bottom: 56px; }
+
+.sell-pillars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
+.sell-pillar { background: var(--surface); padding: 28px 24px; display: grid; gap: 12px; align-content: start; }
+.sell-pillar h3 { font-family: var(--serif); font-size: 28px; line-height: 1.05; }
+.sell-pillar p { font-size: 15px; color: var(--ink-2); }
+
+/* Listing kit */
+.sell-kit-sec { background: var(--niebla-2); }
+.sell-kit { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 80px); align-items: center; }
+.sell-kit-copy { display: grid; gap: 16px; }
+.sell-kit-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; }
+.sell-kit-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line-2); font-size: 15.5px; }
+.sell-kit-list li:last-child { border-bottom: 1px solid var(--line-2); }
+.sell-kit-meta { font-size: 12px; color: var(--cafetal); white-space: nowrap; }
+.sell-kit-visual { position: relative; padding-bottom: 96px; }
+.sell-kit-visual > .img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 20px; }
+.sell-kit-float { position: absolute; right: -24px; bottom: 0; width: min(340px, 72%); box-shadow: 0 30px 70px rgba(21, 27, 24, .22); border-radius: 18px; }
+.sell-kit-float .pcard { background: #fff; }
+
+/* Valuation */
+.sell-val-sec { background: var(--surface); }
+.valuator { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 24px; align-items: start; background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: clamp(20px, 3vw, 36px); }
+.val-inputs { display: grid; gap: 24px; position: sticky; top: calc(var(--header-h) + 24px); }
+.val-inputs > fieldset > legend { font-size: 13.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 8px; padding: 0; }
+.val-size { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+.val-size-num { display: inline-flex; align-items: center; gap: 6px; }
+.val-size-num input { width: 96px; text-align: right; font-family: var(--mono); }
+.val-size-num .mono { font-size: 13px; color: var(--ink-3); }
+.val-radios .radio { text-align: left; }
+.val-switches { display: grid; gap: 14px; }
+.val-results { display: grid; gap: 14px; }
+.val-hero { background: var(--basalto); color: #fff; border-radius: 16px; padding: 24px; display: grid; gap: 8px; }
+.val-hero > span { font-size: 13px; color: rgba(232, 238, 232, .72); }
+.val-hero strong { font: 400 clamp(32px, 3.4vw, 50px)/1.05 var(--serif); font-variant-numeric: tabular-nums; }
+.val-hero small { font-size: 13px; color: rgba(232, 238, 232, .78); line-height: 1.5; }
+.val-hero small .price-roll { color: #fff; font-weight: 600; }
+.val-block { border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; display: grid; gap: 12px; }
+.val-lines th { font-weight: 500; }
+.val-lines td.pos { color: #11704A; }
+.val-lines td.neg { color: var(--danger); }
+.val-comps { list-style: none; padding: 0; margin: 0; display: grid; }
+.val-comps li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; grid-template-areas: 'dot name per price' 'dot meta per price'; column-gap: 12px; align-items: center; padding: 10px 6px; border-top: 1px solid var(--line); border-radius: 8px; transition: background .2s; font-size: 14.5px; }
+.val-comps li.is-hover { background: var(--niebla); }
+.val-comps .sw { grid-area: dot; }
+.val-comps a { grid-area: name; font-weight: 600; text-decoration: none; }
+.val-comps a:hover { text-decoration: underline; }
+.val-comp-meta { grid-area: meta; font-size: 12.5px; color: var(--ink-3); }
+.val-comps li > .mono:not(.price-roll) { grid-area: per; font-size: 13px; color: var(--ink-2); }
+.val-comps li > .price-roll { grid-area: price; font-size: 13px; font-weight: 600; min-width: 84px; text-align: right; }
+.val-build { grid-template-columns: 22px 1fr; align-items: start; background: var(--cafetal-soft); border-color: transparent; color: var(--ink); }
+.val-build svg { color: var(--cafetal); margin-top: 2px; }
+.val-build p { font-size: 14.5px; }
+.val-build .link-btn { display: inline-flex; margin-top: 4px; font-size: 14.5px; }
+
+/* Price-per-m² strip */
+.vstrip { margin: 0; display: grid; gap: 14px; }
+.vstrip-plot { position: relative; height: 104px; margin-inline: 4px; }
+.vstrip-axis { position: absolute; left: 0; right: 0; top: 42px; height: 2px; background: var(--line); border-radius: 2px; }
+.vstrip-zone { position: absolute; top: 36px; height: 14px; background: var(--niebla-2); border: 1px solid var(--line-2); border-radius: 4px; }
+.vstrip-band { position: absolute; top: 33px; height: 20px; border-radius: 4px; opacity: .3; }
+.vstrip-mark { position: absolute; top: 22px; width: 0; height: 40px; }
+.vstrip-mark::before { content: ''; position: absolute; left: -1px; top: 0; width: 2px; height: 100%; background: #9A55B0; border-radius: 2px; }
+.vstrip-mark::after { content: ''; position: absolute; left: -6px; top: 15px; width: 12px; height: 12px; border-radius: 50%; background: #9A55B0; box-shadow: 0 0 0 2px #fff; }
+.vstrip-mark-label { position: absolute; bottom: calc(100% + 6px); left: 0; transform: translateX(-50%); font-size: 12.5px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.vstrip-mark.is-left .vstrip-mark-label { transform: translateX(-8px); }
+.vstrip-mark.is-right .vstrip-mark-label { transform: translateX(calc(-100% + 8px)); }
+.vstrip-rug { position: absolute; left: 0; right: 0; top: 78px; border-top: 1px dashed var(--line); }
+.vstrip-dot { position: absolute; top: 73px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; box-shadow: 0 0 0 2px #fff; cursor: default; transition: transform .2s; }
+.vstrip-dot::after { content: ''; position: absolute; inset: -8px; }
+.vstrip-dot.is-hover { transform: scale(1.5); z-index: 2; }
+.vstrip-tip { position: absolute; top: 88px; transform: translateX(-50%); background: var(--basalto); color: #fff; font-size: 12px; padding: 5px 9px; border-radius: 8px; white-space: nowrap; z-index: 3; pointer-events: none; }
+.vstrip-tip.is-left { transform: translateX(-10px); }
+.vstrip-tip.is-right { transform: translateX(calc(-100% + 10px)); }
+.vstrip-tick { position: absolute; top: 54px; transform: translateX(-50%); font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+.vstrip-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-2); }
+.vstrip-legend span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { display: inline-block; width: 14px; height: 10px; border-radius: 3px; flex: none; }
+.sw-zone { background: var(--niebla-2); border: 1px solid var(--line-2); }
+.sw-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Process and documents */
+.sell-steps { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.sell-steps h3 { font-size: 26px; }
+.sell-docs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; margin-top: clamp(32px, 4vw, 56px); }
+.sell-docs-col { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: clamp(22px, 3vw, 32px); display: grid; gap: 16px; align-content: start; }
+.sell-docs-col .check-list li { font-size: 15px; }
+.sell-closing { background: var(--basalto); color: #fff; border-color: var(--basalto); }
+.sell-closing .check { background: var(--guaria); }
+.sell-closing .fine { color: rgba(232, 238, 232, .66); }
+
+/* Owner quotes */
+.sell-voices-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(32px, 5vw, 80px); align-items: center; }
+.sell-voices-img .img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 20px; }
+.sell-quotes { display: grid; gap: 36px; margin-top: 24px; }
+
+/* Home teaser */
+.sell-teaser { background: var(--surface); border-top: 1px solid var(--line); }
+.sell-teaser-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+.sell-teaser-img .img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 20px; }
+.sell-teaser-copy { display: grid; gap: 16px; justify-items: start; }
+.sell-teaser-ranges { list-style: none; padding: 0; margin: 4px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 28px; width: 100%; }
+.sell-teaser-ranges li { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 8px; font-size: 14.5px; }
+.sell-teaser-ranges .mono { font-size: 13px; color: var(--ink-2); }
+
+@media (max-width: 1100px) {
+  .sell-pillars { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sell-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .sell-kit, .valuator, .sell-docs, .sell-voices-grid, .sell-teaser-grid { grid-template-columns: 1fr; }
+  .val-inputs { position: static; }
+  .sell-kit-float { right: 12px; }
+  .sell-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .sell-pillars, .sell-steps { grid-template-columns: 1fr; }
+  .sell-kit-visual { padding-bottom: 0; }
+  .sell-kit-float { position: relative; right: auto; width: auto; margin: -64px 16px 0; }
+  .val-comps li { grid-template-columns: 10px minmax(0, 1fr) auto; grid-template-areas: 'dot name price' 'dot meta per'; }
+  .val-comps li > .mono:not(.price-roll) { text-align: right; }
+  .sell-teaser-ranges { grid-template-columns: 1fr; }
+}

@@ -5,6 +5,7 @@ import './styles/base.css';
 import './styles/components.css';
 import './styles/pages.css';
 import './styles/projects.css';
+import './styles/sell.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
