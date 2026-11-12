@@ -36,3 +36,7 @@ export const IconFilter = ({ size, ...p }: P) => <svg {...base(size)} {...p}><pa
 export const IconMap = ({ size, ...p }: P) => <svg {...base(size)} {...p}><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14" /></svg>;
 export const IconList = ({ size, ...p }: P) => <svg {...base(size)} {...p}><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" /></svg>;
 export const IconExpand = ({ size, ...p }: P) => <svg {...base(size)} {...p}><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" /></svg>;
+export const IconPen = ({ size, ...p }: P) => <svg {...base(size)} {...p}><path d="M14 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6M8 9h5M8 13h3M8 17h2" /><path d="m13 17 1-3.5 6-6a1.4 1.4 0 0 1 2 2l-6 6L13 17z" /></svg>;
+export const IconLock = ({ size, ...p }: P) => <svg {...base(size)} {...p}><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" /></svg>;
+export const IconBank = ({ size, ...p }: P) => <svg {...base(size)} {...p}><path d="M3 9.5 12 4l9 5.5M4 20h16M6 10v7M10 10v7M14 10v7M18 10v7" /></svg>;
+export const IconUsers = ({ size, ...p }: P) => <svg {...base(size)} {...p}><circle cx="9" cy="8" r="3.2" /><path d="M3 20a6 6 0 0 1 12 0M15.5 5a3 3 0 0 1 0 6M18 14.5a5.5 5.5 0 0 1 3 5.5" /></svg>;

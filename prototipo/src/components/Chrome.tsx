@@ -29,15 +29,16 @@ export function Header() {
   const { tx } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const overDark = ['home', 'build', 'projects', 'project', 'sell'].includes(route.name) && !scrolled && !open;
+  const overDark = ['home', 'build', 'projects', 'project', 'sell', 'about'].includes(route.name) && !scrolled && !open;
 
-  const nav: { label: string; to: Route }[] = [
+  const nav: { label: string; to: Route; className?: string }[] = [
     { label: tx('Buy', 'Comprar'), to: { name: 'search' } },
     { label: tx('Sell', 'Vender'), to: { name: 'sell' } },
     { label: tx('Pre-sales', 'Preventas'), to: { name: 'projects' } },
     { label: 'Land & Build', to: { name: 'build' } },
     { label: tx('True cost', 'Costo real'), to: { name: 'calculator' } },
-    { label: tx('Contact', 'Contacto'), to: { name: 'contact' } },
+    { label: tx('About', 'Nosotros'), to: { name: 'about' } },
+    { label: tx('Contact', 'Contacto'), to: { name: 'contact' }, className: 'nav-link-contact' },
   ];
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export function Header() {
         <Link to={{ name: 'home' }} className="header-logo" aria-label={tx('Soluciones Inmobiliarias CR, home', 'Soluciones Inmobiliarias CR, inicio')}><Logo /></Link>
         <nav className="header-nav" aria-label={tx('Main', 'Principal')}>
           {nav.map(n => (
-            <Link key={n.to.name} to={n.to} className={`nav-link ${route.name === n.to.name || (n.to.name === 'projects' && route.name === 'project') ? 'is-current' : ''}`} aria-current={route.name === n.to.name ? 'page' : undefined}>
+            <Link key={n.to.name} to={n.to} className={`nav-link ${n.className ?? ''} ${route.name === n.to.name || (n.to.name === 'projects' && route.name === 'project') ? 'is-current' : ''}`} aria-current={route.name === n.to.name ? 'page' : undefined}>
               {n.label}
             </Link>
           ))}
@@ -116,6 +117,7 @@ export function Footer() {
           <Link to={{ name: 'sell' }}>{tx('Sell your property', 'Venda su propiedad')}</Link>
           <Link to={{ name: 'build' }}>Land &amp; Build</Link>
           <Link to={{ name: 'calculator' }}>{tx('True-cost calculator', 'Calculadora de costo real')}</Link>
+          <Link to={{ name: 'about' }}>{tx('About us', 'Nosotros')}</Link>
           <Link to={{ name: 'contact' }}>{tx('Contact', 'Contacto')}</Link>
         </div>
         <div>
@@ -127,6 +129,7 @@ export function Footer() {
           <span>{tx('Member, Cámara Costarricense de Corredores de Bienes Raíces (CCCBR)', 'Miembro de la Cámara Costarricense de Corredores de Bienes Raíces (CCCBR)')}</span>
           <span>{tx('Registered with SUGEF under Law 7786', 'Inscritos ante SUGEF según la Ley 7786')}</span>
           <span>{tx('Closings through SUGEF-regulated escrow agents', 'Cierres con agentes escrow regulados por SUGEF')}</span>
+          <Link to={{ name: 'about' }}>{tx('Our team and partners', 'Nuestro equipo y aliados')}</Link>
         </div>
         <div>
           <h4>{tx('Office', 'Oficina')}</h4>

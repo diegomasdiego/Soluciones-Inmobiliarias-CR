@@ -46,7 +46,7 @@ const terrain: TopoCenter[] = [
 type Props = {
   items: Property[];
   /** Extra labelled dots that are not listings (for example, a project's location). */
-  points?: { id: string; label: string; lat: number; lng: number }[];
+  points?: { id: string; label: string; lat: number; lng: number; showLabel?: boolean }[];
   active?: string | null;
   onHover?: (slug: string | null) => void;
   mini?: boolean;
@@ -107,6 +107,7 @@ export function MapView({ items, points = [], active, onHover, mini, className }
         return (
           <span key={pt.id} className="pin is-active map-point" style={{ left: `${pos.x}%`, top: `${pos.y}%`, zIndex: 30 }} role="img" aria-label={pt.label}>
             <span className="pin-dot" />
+            {pt.showLabel && <span className="map-point-label" aria-hidden="true">{pt.label}</span>}
           </span>
         );
       })}

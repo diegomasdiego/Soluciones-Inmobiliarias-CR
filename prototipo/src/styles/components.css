@@ -37,8 +37,15 @@
 
 .header-tools .seg button { white-space: nowrap; }
 
-@media (max-width: 1320px) { .header-cta { display: none; } }
-@media (max-width: 1100px) {
+/* Wide screens show the "Talk to an advisor" button, so the Contact link would repeat it. */
+@media (min-width: 1366px) { .nav-link-contact { display: none; } }
+@media (max-width: 1365px) {
+  .header-cta { display: none; }
+  .header-inner { gap: 20px; }
+  .header-nav { gap: 18px; }
+  .nav-link { font-size: 14px; }
+}
+@media (max-width: 1200px) {
   .header-nav { display: none; }
   .menu-btn { display: grid; }
 }

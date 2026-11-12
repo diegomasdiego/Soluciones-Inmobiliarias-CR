@@ -70,10 +70,12 @@ Free stock media used in the prototype. Replace with the company's own photograp
 | proj-tropical-house | Talha Resitoglu | [Pexels License](https://www.pexels.com/photo/30242715/) |
 | proj-pool | Alejandro Orozco | [Pexels License](https://www.pexels.com/photo/32509620/) |
 | proj-model-living | Zack Tu Nan | [Pexels License](https://www.pexels.com/photo/8900181/) |
-| hero-poster | Arturo Salas | [Pexels License](https://www.pexels.com/video/aerial-view-of-lush-alajuela-landscape-in-daylight-35177375/) |
-| sell-visit | Vitaly Gariev | [Pexels License](https://www.pexels.com/photo/23224999/) |
-| sell-shoot | Vitaly Gariev | [Pexels License](https://www.pexels.com/photo/23224703/) |
 | sell-hero | Vero Benedini | [Pexels License](https://www.pexels.com/photo/28915352/) |
+| sell-shoot | Vitaly Gariev | [Pexels License](https://www.pexels.com/photo/23224703/) |
+| sell-visit | Vitaly Gariev | [Pexels License](https://www.pexels.com/photo/23224999/) |
+| hero-poster | Arturo Salas | [Pexels License](https://www.pexels.com/video/aerial-view-of-lush-alajuela-landscape-in-daylight-35177375/) |
+| about-signing | RDNE Stock project | [Pexels License](https://www.pexels.com/photo/8292787/) |
+| about-team | Pavel Danilyuk | [Pexels License](https://www.pexels.com/photo/6340618/) |
 | pano-living | Poly Haven | [CC0](https://polyhaven.com/a/cayley_interior) |
 | pano-terrace | Poly Haven | [CC0](https://polyhaven.com/a/veranda) |
 | hero.mp4 | Arturo Salas | [Pexels License](https://www.pexels.com/video/aerial-view-of-lush-alajuela-landscape-in-daylight-35177375/) |

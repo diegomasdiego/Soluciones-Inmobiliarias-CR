@@ -307,7 +307,10 @@ function Testimonials() {
   return (
     <section className="section testimonials">
       <div className="wrap">
-        <p className="eyebrow">{tx('From our clients', 'Lo que dicen nuestros clientes')}</p>
+        <div className="testimonials-head">
+          <p className="eyebrow">{tx('From our clients', 'Lo que dicen nuestros clientes')}</p>
+          <Link to={{ name: 'about' }} className="link-btn">{tx('Meet the team behind them', 'Conozca al equipo')} <IconArrow size={18} /></Link>
+        </div>
         <div className="quotes">
           {testimonials.map((t, i) => (
             <Reveal key={t.name} delay={i * 0.1} className="quote">
