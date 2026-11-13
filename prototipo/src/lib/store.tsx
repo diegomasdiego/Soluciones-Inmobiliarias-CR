@@ -10,6 +10,8 @@ type Store = {
   rate: number;
   saved: string[];
   toggleSaved: (slug: string) => boolean;
+  /** Adds several properties at once (a shared list), keeping their order. */
+  addSaved: (slugs: string[]) => void;
   filters: Filters;
   setFilters: (f: Filters) => void;
   /** Free-text query from the smart search; its "understood" chips are derived per language. */
@@ -60,6 +62,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return adding;
   }, [saved]);
 
+  const addSaved = useCallback((slugs: string[]) => {
+    setSaved(prev => [...prev, ...slugs.filter((s, i) => !prev.includes(s) && slugs.indexOf(s) === i)]);
+  }, []);
+
   const runQuery = useCallback((q: string) => {
     const { filters: f } = parseQuery(q);
     setQuery(q);
@@ -74,8 +80,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Store>(() => ({
     currency, setCurrency: setCurrencyState, rate: company.exchangeRate,
-    saved, toggleSaved, filters, setFilters, query, runQuery, clearQuery, sort, setSort, toast, notify,
-  }), [currency, saved, toggleSaved, filters, query, runQuery, clearQuery, sort, toast, notify]);
+    saved, toggleSaved, addSaved, filters, setFilters, query, runQuery, clearQuery, sort, setSort, toast, notify,
+  }), [currency, saved, toggleSaved, addSaved, filters, query, runQuery, clearQuery, sort, toast, notify]);
 
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;
 }

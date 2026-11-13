@@ -7,6 +7,7 @@ import './styles/pages.css';
 import './styles/projects.css';
 import './styles/sell.css';
 import './styles/about.css';
+import './styles/saved.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

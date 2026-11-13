@@ -25,7 +25,7 @@ export function LangToggle({ dark, big }: { dark?: boolean; big?: boolean }) {
 
 export function Header() {
   const { route } = useRouter();
-  const { saved, notify } = useStore();
+  const { saved } = useStore();
   const { tx } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -63,19 +63,17 @@ export function Header() {
         <div className="header-tools">
           <CurrencyToggle dark={overDark} />
           <LangToggle dark={overDark} />
-          <button
-            type="button"
-            className="saved-count"
-            onClick={() => notify(saved.length
-              ? tx(`${saved.length} saved. Side-by-side compare arrives in phase 2.`, `${saved.length} guardadas. El comparador llega en la fase 2.`)
-              : tx('Tap the heart on any property to save it.', 'Toque el corazón de una propiedad para guardarla.'))}
-            aria-label={tx(`${saved.length} saved properties`, `${saved.length} propiedades guardadas`)}
+          <Link
+            to={{ name: 'saved' }}
+            className={`saved-count ${route.name === 'saved' ? 'is-current' : ''}`}
+            aria-current={route.name === 'saved' ? 'page' : undefined}
+            aria-label={tx(`${saved.length} saved properties: compare them`, `${saved.length} propiedades guardadas: compararlas`)}
           >
             <IconHeart size={18} />
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.span key={saved.length} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 10, opacity: 0 }}>{saved.length}</motion.span>
             </AnimatePresence>
-          </button>
+          </Link>
           <Link to={{ name: 'contact' }} className="btn btn-accent header-cta">{tx('Talk to an advisor', 'Hablar con un asesor')}</Link>
           <button type="button" className="menu-btn" aria-expanded={open} aria-label={open ? tx('Close menu', 'Cerrar menú') : tx('Open menu', 'Abrir menú')} onClick={() => setOpen(o => !o)}>
             {open ? <IconClose /> : <IconMenu />}
@@ -90,6 +88,11 @@ export function Header() {
                 <Link to={n.to} className="mobile-link">{n.label}</Link>
               </motion.div>
             ))}
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * nav.length }}>
+              <Link to={{ name: 'saved' }} className="mobile-link mobile-link-saved">
+                <IconHeart size={26} /> {tx('Saved', 'Guardadas')} <span className="mono">{saved.length}</span>
+              </Link>
+            </motion.div>
             <div className="mobile-tools">
               <div><span className="mobile-tools-label">{tx('Language', 'Idioma')}</span><LangToggle big /></div>
               <div><span className="mobile-tools-label">{tx('Currency', 'Moneda')}</span><CurrencyToggle /></div>
@@ -113,6 +116,7 @@ export function Footer() {
         <div>
           <h4>{tx('Explore', 'Explorar')}</h4>
           <Link to={{ name: 'search' }}>{tx('Properties for sale', 'Propiedades en venta')}</Link>
+          <Link to={{ name: 'saved' }}>{tx('Saved and compare', 'Guardadas y comparador')}</Link>
           <Link to={{ name: 'projects' }}>{tx('Projects & pre-sales', 'Proyectos y preventas')}</Link>
           <Link to={{ name: 'sell' }}>{tx('Sell your property', 'Venda su propiedad')}</Link>
           <Link to={{ name: 'build' }}>Land &amp; Build</Link>

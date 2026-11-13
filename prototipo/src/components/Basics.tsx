@@ -77,7 +77,7 @@ export function SaveButton({ slug, className, label }: { slug: string; className
         e.stopPropagation();
         const added = toggleSaved(slug);
         notify(added
-          ? tx('Saved. Compare saved homes side by side in phase 2.', 'Guardada. El comparador de propiedades llega en la fase 2.')
+          ? tx('Saved. Compare it with the others from the heart at the top.', 'Guardada. Compárela con las demás desde el corazón de arriba.')
           : tx('Removed from saved.', 'Se quitó de guardadas.'));
       }}
     >
