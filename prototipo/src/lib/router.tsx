@@ -17,6 +17,8 @@ export type Route =
   | { name: 'about' }
   /** Saved properties; `shared` holds the slugs of a list someone sent by link. */
   | { name: 'saved'; shared?: string[] }
+  | { name: 'guides' }
+  | { name: 'guide'; slug: string }
   | { name: 'panel' };
 
 export function parseHash(hash: string): Route {
@@ -26,6 +28,8 @@ export function parseHash(hash: string): Route {
   if (h === 'sell') return { name: 'sell' };
   if (h === 'about') return { name: 'about' };
   if (h === 'saved') return { name: 'saved' };
+  if (h === 'guides') return { name: 'guides' };
+  if (h.startsWith('guide-')) return { name: 'guide', slug: h.slice(6) };
   if (h.startsWith('compare-')) return { name: 'saved', shared: h.slice(8).split(',').filter(Boolean).slice(0, 12) };
   if (h.startsWith('project-')) return { name: 'project', slug: h.slice(8) };
   if (h === 'search') return { name: 'search' };
@@ -51,6 +55,8 @@ export function toHash(r: Route): string {
     case 'sell': return 'sell';
     case 'about': return 'about';
     case 'saved': return r.shared?.length ? `compare-${r.shared.join(',')}` : 'saved';
+    case 'guides': return 'guides';
+    case 'guide': return `guide-${r.slug}`;
     case 'panel': return 'panel';
   }
 }

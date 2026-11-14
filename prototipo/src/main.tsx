@@ -8,6 +8,7 @@ import './styles/projects.css';
 import './styles/sell.css';
 import './styles/about.css';
 import './styles/saved.css';
+import './styles/guides.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

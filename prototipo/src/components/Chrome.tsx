@@ -89,6 +89,9 @@ export function Header() {
               </motion.div>
             ))}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * nav.length }}>
+              <Link to={{ name: 'guides' }} className="mobile-link">{tx('Guides', 'Guías')}</Link>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * (nav.length + 1) }}>
               <Link to={{ name: 'saved' }} className="mobile-link mobile-link-saved">
                 <IconHeart size={26} /> {tx('Saved', 'Guardadas')} <span className="mono">{saved.length}</span>
               </Link>
@@ -121,6 +124,7 @@ export function Footer() {
           <Link to={{ name: 'sell' }}>{tx('Sell your property', 'Venda su propiedad')}</Link>
           <Link to={{ name: 'build' }}>Land &amp; Build</Link>
           <Link to={{ name: 'calculator' }}>{tx('True-cost calculator', 'Calculadora de costo real')}</Link>
+          <Link to={{ name: 'guides' }}>{tx('Buyer guides', 'Guías para comprar')}</Link>
           <Link to={{ name: 'about' }}>{tx('About us', 'Nosotros')}</Link>
           <Link to={{ name: 'contact' }}>{tx('Contact', 'Contacto')}</Link>
         </div>

@@ -16,6 +16,8 @@ import Project from './pages/Project';
 import Sell from './pages/Sell';
 import About from './pages/About';
 import Saved from './pages/Saved';
+import Guides from './pages/Guides';
+import Guide from './pages/Guide';
 
 // Team panel: its own chunk, so visitors never download it.
 const Panel = lazy(() => import('./pages/Panel'));
@@ -33,6 +35,8 @@ function Page() {
     case 'sell': return <Sell />;
     case 'about': return <About />;
     case 'saved': return <Saved shared={route.shared} key={route.shared?.join(',') ?? 'mine'} />;
+    case 'guides': return <Guides />;
+    case 'guide': return <Guide slug={route.slug} />;
     default: return <Home />;
   }
 }

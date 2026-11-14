@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { advisors } from '../data/company';
-import { grossYield, isResidencyEligible, type Property as P } from '../data/properties';
+import { grossYield, type Property as P } from '../data/properties';
 import { useProperties } from '../lib/data';
 import { localize, typeLabel } from '../data/properties.es';
 import { closingCosts, rentalYield, sum, yearlyHolding } from '../lib/costs';
@@ -66,7 +66,7 @@ function PropertyView({ raw }: { raw: P }) {
   const project = projectForProperty(p.slug);
   const { propertyTax, insurance } = yearlyHolding(p.priceUsd);
   const monthly = p.hoaUsd + propertyTax / 12 + insurance / 12;
-  const closing = sum(closingCosts(p.priceUsd, { residency: isResidencyEligible(p), split: false }, lang));
+  const closing = sum(closingCosts(p.priceUsd, { law9996: false, split: false }, lang));
   const yieldInfo = p.rentUsd ? rentalYield(p.priceUsd, p.rentUsd, p.hoaUsd) : null;
   const similar = useMemo(
     () => properties.filter(o => o.slug !== p.slug).sort((a, b) => Number(b.area === p.area) - Number(a.area === p.area) || Math.abs(a.priceUsd - p.priceUsd) - Math.abs(b.priceUsd - p.priceUsd)).slice(0, 3),
@@ -214,8 +214,8 @@ function PropertyView({ raw }: { raw: P }) {
                 <span>{tx('One-time closing costs (est.)', 'Gastos de cierre, una sola vez (est.)')}</span>
                 <strong>{money(closing, currency, rate)}</strong>
                 <p>{tx(
-                  `${pct(closing / p.priceUsd)} of the price: transfer tax, registry, notary, escrow and title study${isResidencyEligible(p) ? ', with the Law 9996 transfer-tax discount if you apply for residency' : ''}.`,
-                  `${pct(closing / p.priceUsd).replace('.', ',')} del precio: impuesto de traspaso, registro, notario, escrow y estudio registral${isResidencyEligible(p) ? ', con el descuento de la Ley 9996 en el traspaso si solicita la residencia' : ''}.`,
+                  `${pct(closing / p.priceUsd)} of the price: transfer tax, registry, notary, escrow and title study.`,
+                  `${pct(closing / p.priceUsd).replace('.', ',')} del precio: impuesto de traspaso, registro, notario, escrow y estudio registral.`,
                 )}</p>
                 <button type="button" className="link-btn" onClick={() => navigate({ name: 'calculator', slug: p.slug })}><IconCalc size={18} /> {tx('Run the numbers', 'Hacer los cálculos')} <IconArrow size={16} /></button>
               </div>
@@ -259,6 +259,10 @@ function PropertyView({ raw }: { raw: P }) {
               </dl>
               <VerifiedPanel p={p} />
             </div>
+            <p className="legal-guides">
+              <Link to={{ name: 'guide', slug: 'buying-process' }} className="link-btn">{tx('How a purchase works, step by step', 'Cómo funciona la compra, paso a paso')} <IconArrow size={16} /></Link>
+              <Link to={{ name: 'guide', slug: 'taxes' }} className="link-btn">{tx('Taxes when you buy and own', 'Impuestos al comprar y tener')} <IconArrow size={16} /></Link>
+            </p>
           </section>
 
           <section ref={refs.visit} className="prop-sec visit">

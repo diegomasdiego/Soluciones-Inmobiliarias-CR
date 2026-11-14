@@ -1,8 +1,16 @@
-// Buyer-side cost model for Costa Rica, based on the 2026 regulations summarized in the client's
-// market report. Planning estimates only; a notary confirms the final figures.
+// Buyer-side cost model for Costa Rica, based on the client's 2026 market report and checked against
+// official sources in November 2026 (see the taxes guide, src/data/guides.ts). Planning estimates only;
+// a notary confirms the final figures.
 import type { Lang } from './i18n';
 
-export type ClosingOptions = { residency: boolean; split: boolean };
+export type ClosingOptions = {
+  /**
+   * The buyer already holds the Law 9996 tax benefits. New requests closed on 14 July 2026
+   * (art. 12); people granted them before keep them for ten years.
+   */
+  law9996: boolean;
+  split: boolean;
+};
 export type CostLine = { label: string; note: string; value: number };
 
 export const RATES = {
@@ -10,7 +18,7 @@ export const RATES = {
   registry: 0.005, // Registro Nacional fees and fiscal stamps (approx.)
   notary: 0.0125, // notary fees, scaled by the Bar; 1–1.25% typical
   vat: 0.13,
-  residencyTransferDiscount: 0.2, // Law 9996: 20% off the transfer tax
+  law9996TransferDiscount: 0.2, // Law 9996: 20% off the transfer tax, for existing beneficiaries only
   propertyTax: 0.0025, // Law 7509, yearly, on registered value
   insurance: 0.002, // typical home policy, yearly
   escrowUsd: 750,
@@ -20,11 +28,11 @@ export const RATES = {
 export function closingCosts(price: number, o: ClosingOptions, lang: Lang = 'en'): CostLine[] {
   const es = lang === 'es';
   const share = o.split ? 0.5 : 1;
-  const transferRate = RATES.transfer * (o.residency ? 1 - RATES.residencyTransferDiscount : 1);
+  const transferRate = RATES.transfer * (o.law9996 ? 1 - RATES.law9996TransferDiscount : 1);
   return [
     {
       label: es ? 'Impuesto de traspaso' : 'Transfer tax',
-      note: o.residency ? (es ? '1,5% menos 20% (Ley 9996)' : '1.5% less 20% (Law 9996)') : (es ? '1,5% del precio' : '1.5% of the price'),
+      note: o.law9996 ? (es ? '1,5% menos 20% (beneficio de la Ley 9996)' : '1.5% less 20% (Law 9996 benefit)') : (es ? '1,5% del precio' : '1.5% of the price'),
       value: price * transferRate * share,
     },
     { label: es ? 'Derechos de registro y timbres' : 'Registry fees and fiscal stamps', note: es ? '≈0,5% del precio' : '≈0.5% of the price', value: price * RATES.registry * share },

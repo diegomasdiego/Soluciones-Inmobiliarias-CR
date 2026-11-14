@@ -496,9 +496,11 @@ export default function Sell() {
               <ul className="check-list">
                 <li><span className="check"><IconCheck size={14} /></span>{tx('Nothing to pay up front. Our commission is paid only when the sale closes, from the proceeds.', 'Nada que pagar por adelantado. Nuestra comisión se paga solo cuando la venta se cierra, del monto de la venta.')}</li>
                 <li><span className="check"><IconCheck size={14} /></span>{tx('The money moves through a SUGEF-regulated escrow agent, never through us.', 'El dinero pasa por un agente escrow regulado por SUGEF, nunca por nosotros.')}</li>
-                <li><span className="check"><IconCheck size={14} /></span>{tx('The buyer withholds 2% of the price (2.5% if you live abroad) as an advance on your capital-gains tax, declared on TRIBU-CR.', 'El comprador retiene el 2% del precio (2,5% si usted no vive en el país) a cuenta de su impuesto de ganancias de capital, que se declara en TRIBU-CR.')}</li>
+                <li><span className="check"><IconCheck size={14} /></span>{tx('If you are not domiciled in Costa Rica, the buyer withholds 2.5% of the price toward your capital-gains tax and files it on TRIBU-CR. If you live here, there is no withholding.', 'Si usted no está domiciliado en Costa Rica, el comprador retiene el 2,5% del precio a cuenta de su impuesto de ganancias de capital y lo declara en TRIBU-CR. Si vive en el país, no hay retención.')}</li>
+                <li><span className="check"><IconCheck size={14} /></span>{tx('Capital-gains tax is 15% of the gain. Your home is exempt, and property bought before July 2019 can pay 2.25% of the price instead on its first sale.', 'El impuesto de ganancias de capital es del 15% sobre la ganancia. Su vivienda habitual está exenta, y una propiedad comprada antes de julio de 2019 puede pagar en su lugar el 2,25% del precio en la primera venta.')}</li>
               </ul>
-              <p className="fine">{tx('General information, not legal or tax advice. Your notary confirms what applies to your sale.', 'Información general, no asesoría legal ni tributaria. Su notario confirma lo que aplica a su venta.')}</p>
+              <p className="fine">{tx('General information, not legal or tax advice. Your notary confirms what applies to your sale.', 'Información general, no asesoría legal ni tributaria. Su notario confirma lo que aplica a su venta.')}{' '}
+                <Link to={{ name: 'guide', slug: 'taxes' }} className="link-btn">{tx('Taxes guide', 'Guía de impuestos')} <IconArrow size={16} /></Link></p>
             </Reveal>
           </div>
         </div>

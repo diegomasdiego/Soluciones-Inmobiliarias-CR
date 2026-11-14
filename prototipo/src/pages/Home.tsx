@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, useInView, useScroll, useTransform } from 'motion/react';
 import { company, equipment, testimonials, zones, type Zone } from '../data/company';
+import { guides } from '../data/guides';
+import { GuideCard } from '../components/GuideParts';
 import { RESIDENCY_MIN_USD, type Property } from '../data/properties';
 import { useProperties } from '../lib/data';
 import { closingCosts, sum, yearlyHolding } from '../lib/costs';
@@ -242,7 +244,7 @@ function CostTeaser() {
   const [price, setPrice] = useState(350000);
   const { currency, rate, runQuery } = useStore();
   const { navigate } = useRouter();
-  const closing = sum(closingCosts(price, { residency: price >= RESIDENCY_MIN_USD, split: false }, lang));
+  const closing = sum(closingCosts(price, { law9996: false, split: false }, lang));
   const { propertyTax } = yearlyHolding(price);
   const eligible = price >= RESIDENCY_MIN_USD;
   return (
@@ -270,6 +272,26 @@ function CostTeaser() {
           </dl>
           <Link to={{ name: 'calculator' }} className="link-btn">{tx('Open the full calculator', 'Abrir la calculadora completa')} <IconArrow size={18} /></Link>
         </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function GuidesTeaser() {
+  const { tx } = useLang();
+  return (
+    <section className="section guides-teaser">
+      <div className="wrap">
+        <div className="section-head row">
+          <div>
+            <p className="eyebrow">{tx('Guides', 'Guías')}</p>
+            <h2 className="h2">{tx('Buying in Costa Rica, explained', 'Comprar en Costa Rica, explicado')}</h2>
+          </div>
+          <Link to={{ name: 'guides' }} className="link-btn">{tx('All guides and the glossary', 'Todas las guías y el glosario')} <IconArrow size={18} /></Link>
+        </div>
+        <div className="guides-grid is-four">
+          {guides.map((g, i) => <Reveal key={g.slug} delay={i * 0.06}><GuideCard g={g} index={i} compact /></Reveal>)}
+        </div>
       </div>
     </section>
   );
@@ -376,6 +398,7 @@ export default function Home() {
       <Zones />
       <Verified />
       <CostTeaser />
+      <GuidesTeaser />
       <BuildTeaser />
       <Testimonials />
       <SellTeaser />

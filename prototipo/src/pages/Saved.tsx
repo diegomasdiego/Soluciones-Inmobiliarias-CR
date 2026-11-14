@@ -25,7 +25,7 @@ type Down = (typeof DOWNS)[number];
 function metrics(p: Property, down: Down, lang: Lang) {
   const land = p.type === 'Lot' || p.type === 'Farm';
   const { propertyTax, insurance } = yearlyHolding(p.priceUsd);
-  const closing = sum(closingCosts(p.priceUsd, { residency: isResidencyEligible(p), split: false }, lang));
+  const closing = sum(closingCosts(p.priceUsd, { law9996: false, split: false }, lang));
   const downUsd = (p.priceUsd * down) / 100;
   const loan = down >= 100 ? 0 : monthlyPayment(p.priceUsd - downUsd, LOAN.rate, LOAN.years);
   const taxIns = (propertyTax + insurance) / 12;
@@ -242,8 +242,8 @@ function Compare({ list, shared, onRemove }: { list: Property[]; shared: boolean
         </table>
       </div>
       <p className="fine cmp-foot">{tx(
-        'Estimates for planning, with the same model as the true-cost calculator: closing costs include transfer tax (with the Law 9996 discount when it applies), registry, notary and escrow; net yield discounts HOA, tax, insurance, 10% management and 8% vacancy. A notary confirms the final figures.',
-        'Estimaciones para planificar, con el mismo modelo de la calculadora de costo real: los gastos de cierre incluyen traspaso (con el descuento de la Ley 9996 cuando aplica), registro, notario y escrow; la rentabilidad neta descuenta cuota, impuesto, seguro, 10% de administración y 8% de desocupación. El notario confirma las cifras finales.',
+        'Estimates for planning, with the same model as the true-cost calculator: closing costs include transfer tax, registry, notary and escrow; net yield discounts HOA, tax, insurance, 10% management and 8% vacancy, before income tax on the rent. A notary confirms the final figures.',
+        'Estimaciones para planificar, con el mismo modelo de la calculadora de costo real: los gastos de cierre incluyen traspaso, registro, notario y escrow; la rentabilidad neta descuenta cuota, impuesto, seguro, 10% de administración y 8% de desocupación, antes del impuesto sobre la renta del alquiler. El notario confirma las cifras finales.',
       )}</p>
     </div>
   );

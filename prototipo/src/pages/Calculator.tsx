@@ -63,7 +63,7 @@ export default function Calculator({ slug }: { slug?: string }) {
   const [downPct, setDownPct] = useState(30);
   const [ratePct, setRatePct] = useState(defaultRate.USD);
   const [years, setYears] = useState(25);
-  const [residency, setResidency] = useState(true);
+  const [law9996, setLaw9996] = useState(false);
   const [split, setSplit] = useState(false);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export default function Calculator({ slug }: { slug?: string }) {
 
   const dec = (s: string) => (lang === 'es' ? s.replace('.', ',') : s);
   const eligible = price >= RESIDENCY_MIN_USD;
-  const lines = useMemo(() => closingCosts(price, { residency: residency && eligible, split }, lang), [price, residency, eligible, split, lang]);
+  const lines = useMemo(() => closingCosts(price, { law9996, split }, lang), [price, law9996, split, lang]);
   const closing = sum(lines);
   const down = financing === 'cash' ? price : (price * downPct) / 100;
   const mortgage = financing === 'cash' ? 0 : monthlyPayment(price - down, ratePct / 100, years);
@@ -98,8 +98,8 @@ export default function Calculator({ slug }: { slug?: string }) {
         <p className="eyebrow">{tx('True-cost calculator', 'Calculadora de costo real')}</p>
         <h1 className="h1">{tx('What it really costs to buy in Costa Rica', 'Lo que realmente cuesta comprar en Costa Rica')}</h1>
         <p className="lead">{tx(
-          'Closing costs, taxes, fees and financing in one view, using the 2026 rules: 1.5% transfer tax, notary fees, the Law 9996 residency discount and the 0.25% yearly property tax.',
-          'Gastos de cierre, impuestos, cuotas y financiamiento en una sola vista, con las reglas de 2026: impuesto de traspaso del 1,5%, honorarios del notario, el descuento por residencia de la Ley 9996 y el impuesto de bienes inmuebles del 0,25% anual.',
+          'Closing costs, taxes, fees and financing in one view, using the rules in force in 2026: 1.5% transfer tax, registry fees, notary fees and the 0.25% yearly property tax.',
+          'Gastos de cierre, impuestos, cuotas y financiamiento en una sola vista, con las reglas vigentes en 2026: impuesto de traspaso del 1,5%, derechos de registro, honorarios del notario y el impuesto de bienes inmuebles del 0,25% anual.',
         )}</p>
       </header>
 
@@ -159,10 +159,13 @@ export default function Calculator({ slug }: { slug?: string }) {
 
           <fieldset>
             <legend>{tx('Closing', 'Cierre')}</legend>
-            <label className={`switch ${!eligible ? 'is-disabled' : ''}`}>
-              <input id="calc-residency" type="checkbox" checked={residency && eligible} disabled={!eligible} onChange={e => setResidency(e.target.checked)} />
+            <label className="switch">
+              <input id="calc-law9996" type="checkbox" checked={law9996} onChange={e => setLaw9996(e.target.checked)} />
               <span className="switch-ui" />
-              <span>{tx('I’m applying for investor residency (Law 9996) — 20% off the transfer tax', 'Voy a solicitar la residencia de inversionista (Ley 9996): 20% menos de impuesto de traspaso')}{!eligible && tx(' · needs $150,000 or more', ' · requiere $150.000 o más')}</span>
+              <span>{tx(
+                'I already hold the Law 9996 tax benefits (granted before 14 July 2026): 20% off the transfer tax',
+                'Ya tengo los beneficios fiscales de la Ley 9996 (otorgados antes del 14 de julio de 2026): 20% menos de impuesto de traspaso',
+              )}</span>
             </label>
             <label className="switch">
               <input id="calc-split" type="checkbox" checked={split} onChange={e => setSplit(e.target.checked)} />
@@ -207,11 +210,12 @@ export default function Calculator({ slug }: { slug?: string }) {
             {eligible ? <IconCheck size={18} /> : <span className="dot" />}
             <p>{eligible
               ? (lang === 'es'
-                ? <>Por {fmt(price)}, esta compra cumple el <strong>mínimo de $150.000 para la residencia de inversionista</strong> de la Ley 9996. La residencia, por sí sola, no implica ser residente fiscal.</>
-                : <>At {fmt(price)} this purchase meets the <strong>$150,000 minimum for investor residency</strong> under Law 9996. Residency does not by itself make you a tax resident.</>)
+                ? <>Por {fmt(price)}, esta compra alcanza el <strong>mínimo de $150.000 para la residencia de inversionista</strong> que publica Migración, si la propiedad queda a su nombre y el valor municipal llega a ese monto. La residencia, por sí sola, no implica ser residente fiscal.</>
+                : <>At {fmt(price)} this purchase reaches the <strong>$150,000 minimum for investor residency</strong> published by the immigration office, if the property is in your own name and its municipal value reaches that amount. Residency does not by itself make you a tax resident.</>)
               : (lang === 'es'
                 ? <>La residencia de inversionista requiere al menos <strong>$150.000</strong>. Le faltan {fmt(RESIDENCY_MIN_USD - price)}.</>
-                : <>Investor residency needs at least <strong>$150,000</strong>. You are {fmt(RESIDENCY_MIN_USD - price)} below it.</>)}</p>
+                : <>Investor residency needs at least <strong>$150,000</strong>. You are {fmt(RESIDENCY_MIN_USD - price)} below it.</>)}{' '}
+              <Link to={{ name: 'guide', slug: 'investor-residency' }} className="link-btn">{tx('Residency guide', 'Guía de residencia')} <IconArrow size={16} /></Link></p>
           </section>
 
           {y && (
@@ -232,14 +236,15 @@ export default function Calculator({ slug }: { slug?: string }) {
           <section className="result-block seller-note">
             <h2 className="h4">{tx('Selling instead?', '¿Va a vender?')}</h2>
             <p>{tx(
-              'Since October 2025, buyers must withhold 2% of the price (2.5% if the seller lives abroad) toward the seller’s capital-gains tax, declared on TRIBU-CR. It comes out of the seller’s proceeds, not the buyer’s costs.',
-              'Desde octubre de 2025, el comprador debe retener el 2% del precio (2,5% si el vendedor no está domiciliado en el país) a cuenta del impuesto de ganancias de capital del vendedor, declarado en TRIBU-CR. Sale del monto que recibe el vendedor, no de los costos del comprador.',
-            )}</p>
+              'If the seller is not domiciled in Costa Rica, the buyer must withhold 2.5% of the price toward the seller’s capital-gains tax and file it on TRIBU-CR (form 129). It comes out of the seller’s proceeds, not the buyer’s costs. Between sellers and buyers who both live in Costa Rica there is no withholding.',
+              'Si el vendedor no está domiciliado en Costa Rica, el comprador debe retener el 2,5% del precio a cuenta del impuesto de ganancias de capital del vendedor y declararlo en TRIBU-CR (formulario 129). Sale del monto que recibe el vendedor, no de los costos del comprador. Si el vendedor vive en el país, no hay retención.',
+            )}{' '}
+              <Link to={{ name: 'guide', slug: 'taxes' }} className="link-btn">{tx('Taxes guide', 'Guía de impuestos')} <IconArrow size={16} /></Link></p>
           </section>
 
           <p className="fine">{tx(
-            'Planning estimates, not legal or tax advice. Your notary confirms the final figures. Rates and rules as summarized in our 2026 market research.',
-            'Estimaciones para planificar, no asesoría legal ni tributaria. Su notario confirma las cifras finales. Tasas y reglas según nuestra investigación de mercado de 2026.',
+            'Planning estimates, not legal or tax advice. Your notary confirms the final figures. Rates and rules checked against official sources in November 2026.',
+            'Estimaciones para planificar, no asesoría legal ni tributaria. Su notario confirma las cifras finales. Tasas y reglas revisadas con fuentes oficiales en noviembre de 2026.',
           )}</p>
           {preset && <Link to={{ name: 'property', slug: preset.slug }} className="link-btn">{tx(`Back to ${preset.title}`, `Volver a ${preset.title}`)} <IconArrow size={16} /></Link>}
         </div>
