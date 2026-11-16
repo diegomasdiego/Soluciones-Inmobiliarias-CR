@@ -1,6 +1,6 @@
-// Filters for the Search page and a rule-based natural-language parser that stands in
-// for the AI search in this prototype (production would call a language model).
-// Understands English and Spanish; labels come back in the page language.
+// Filters for the Search page and a rule-based natural-language parser (English and Spanish).
+// The parser answers instantly and is the fallback of the AI search (convex/ai.ts), which
+// returns the same Filters when a language model is configured.
 import { grossYield, isResidencyEligible, type Area, type Property, type PropertyType } from '../data/properties';
 import { typeLabel } from '../data/properties.es';
 import type { Lang } from './i18n';
@@ -20,7 +20,8 @@ export type Filters = {
   text?: string;
 };
 
-export type Sort = 'featured' | 'price-asc' | 'price-desc' | 'yield';
+/** 'match' puts the AI search's picks first, best fit first. */
+export type Sort = 'featured' | 'match' | 'price-asc' | 'price-desc' | 'yield';
 
 export const emptyFilters: Filters = { types: [], areas: [] };
 
@@ -55,46 +56,54 @@ function parseAmount(raw: string, unit?: string): number {
 
 const money = (n: number, lang: Lang = 'en') => '$' + (lang === 'es' ? n.toLocaleString('en-US').replace(/,/g, '.') : n.toLocaleString('en-US'));
 
-export function parseQuery(q: string, lang: Lang = 'en'): { filters: Filters; understood: string[] } {
+export function parseQuery(q: string): Filters {
   const f: Filters = { types: [], areas: [] };
-  const understood: string[] = [];
-  const say = (en: string, es: string) => understood.push(lang === 'es' ? es : en);
   const s = q.trim();
-  if (!s) return { filters: f, understood };
+  if (!s) return f;
 
   const bed = s.match(/(\d+|one|two|three|four|five|uno|una|dos|tres|cuatro|cinco)\s*\+?\s*-?\s*(bed(room)?s?|br|bd|habitaci[oó]n(es)?|cuartos?|dormitorios?)/i);
-  if (bed) {
-    const n = words[bed[1].toLowerCase()] ?? parseInt(bed[1], 10);
-    f.minBeds = n;
-    say(`${n}+ bedrooms`, `${n}+ habitaciones`);
-  }
+  if (bed) f.minBeds = words[bed[1].toLowerCase()] ?? parseInt(bed[1], 10);
 
   const max = s.match(/(under|below|max(imum)?|less than|up to|no more than|hasta|menos de|m[aá]ximo|bajo)\s*(us)?\$?\s*([\d.,]+)\s*(millones|million|mil|k|m)?\b/i);
-  if (max) {
-    f.maxPrice = parseAmount(max[4], max[5]);
-    say(`Under ${money(f.maxPrice)}`, `Hasta ${money(f.maxPrice, 'es')}`);
-  }
+  if (max) f.maxPrice = parseAmount(max[4], max[5]);
   const min = s.match(/(over|above|at least|more than|from|m[aá]s de|desde)\s*(us)?\$?\s*([\d.,]+)\s*(millones|million|mil|k|m)?\b/i);
-  if (min) {
-    f.minPrice = parseAmount(min[3], min[4]);
-    say(`Over ${money(f.minPrice)}`, `Desde ${money(f.minPrice, 'es')}`);
-  }
+  if (min) f.minPrice = parseAmount(min[3], min[4]);
 
-  for (const [re, area] of areaWords) if (re.test(s) && !f.areas.includes(area)) { f.areas.push(area); understood.push(area); }
-  for (const [re, type] of typeWords) if (re.test(s) && !f.types.includes(type)) { f.types.push(type); understood.push(typeLabel(type, lang, true)); }
+  for (const [re, area] of areaWords) if (re.test(s) && !f.areas.includes(area)) f.areas.push(area);
+  for (const [re, type] of typeWords) if (re.test(s) && !f.types.includes(type)) f.types.push(type);
 
-  if (/pool|piscina/i.test(s)) { f.pool = true; say('With pool', 'Con piscina'); }
-  if (/view|vista|mirador/i.test(s)) { f.view = true; say('With a view', 'Con vista'); }
-  if (/school|escuela|colegio|kids|niños/i.test(s)) { f.nearSchools = true; say('Near schools', 'Cerca de escuelas'); }
-  if (/airport|aeropuerto|\bsjo\b|travel|viaj/i.test(s)) { f.nearAirport = true; say('Close to SJO airport', 'Cerca del aeropuerto SJO'); }
-  if (/\b(rent(al|ing)?|invest(ment|ing)?|income|yield|airbnb|alquil\w*|inversi[oó]n|renta\w*)\b/i.test(s)) { f.investment = true; say('Good rental yield', 'Buena rentabilidad'); }
-  if (/residen|visa|9996|immigra|migra/i.test(s)) { f.residency = true; say('Residency-eligible', 'Apta para residencia'); }
+  if (/pool|piscina/i.test(s)) f.pool = true;
+  if (/view|vista|mirador/i.test(s)) f.view = true;
+  if (/school|escuela|colegio|kids|niños/i.test(s)) f.nearSchools = true;
+  if (/airport|aeropuerto|\bsjo\b|travel|viaj/i.test(s)) f.nearAirport = true;
+  if (/\b(rent(al|ing)?|invest(ment|ing)?|income|yield|airbnb|alquil\w*|inversi[oó]n|renta\w*)\b/i.test(s)) f.investment = true;
+  if (/residen|visa|9996|immigra|migra/i.test(s)) f.residency = true;
 
-  if (!understood.length) { f.text = s; understood.push(`“${s}”`); }
-  return { filters: f, understood };
+  if (activeFilterCount(f) === 0) f.text = s;
+  return f;
 }
 
-export function applyFilters(list: Property[], f: Filters, sort: Sort): Property[] {
+/** The filters as chips in the page language ("Understood … as:"). */
+export function describeFilters(f: Filters, lang: Lang): string[] {
+  const out: string[] = [];
+  const say = (en: string, es: string) => out.push(lang === 'es' ? es : en);
+  for (const t of f.types) out.push(typeLabel(t, lang, true));
+  for (const a of f.areas) out.push(a);
+  if (f.minBeds) say(`${f.minBeds}+ bedrooms`, `${f.minBeds}+ habitaciones`);
+  if (f.minPrice) say(`Over ${money(f.minPrice)}`, `Desde ${money(f.minPrice, 'es')}`);
+  if (f.maxPrice) say(`Under ${money(f.maxPrice)}`, `Hasta ${money(f.maxPrice, 'es')}`);
+  if (f.pool) say('With pool', 'Con piscina');
+  if (f.view) say('With a view', 'Con vista');
+  if (f.nearSchools) say('Near schools', 'Cerca de escuelas');
+  if (f.nearAirport) say('Close to SJO airport', 'Cerca del aeropuerto SJO');
+  if (f.investment) say('Good rental yield', 'Buena rentabilidad');
+  if (f.residency) say('Residency-eligible', 'Apta para residencia');
+  if (f.text) out.push(`“${f.text}”`);
+  return out;
+}
+
+/** `rank` (slugs, best first) orders the results when sort is 'match'; unranked listings follow. */
+export function applyFilters(list: Property[], f: Filters, sort: Sort, rank: string[] = []): Property[] {
   const order = list.map(p => p.slug);
   const text = f.text?.toLowerCase();
   const out = list.filter(p => {
@@ -112,7 +121,9 @@ export function applyFilters(list: Property[], f: Filters, sort: Sort): Property
     if (text && !`${p.title} ${p.headline} ${p.description} ${p.features.join(' ')} ${p.district} ${p.canton}`.toLowerCase().includes(text)) return false;
     return true;
   });
+  const pos = (slug: string) => { const i = rank.indexOf(slug); return i < 0 ? rank.length : i; };
   return out.sort((a, b) => {
+    if (sort === 'match' && pos(a.slug) !== pos(b.slug)) return pos(a.slug) - pos(b.slug);
     if (sort === 'price-asc') return a.priceUsd - b.priceUsd;
     if (sort === 'price-desc') return b.priceUsd - a.priceUsd;
     if (sort === 'yield') return (grossYield(b) ?? 0) - (grossYield(a) ?? 0);

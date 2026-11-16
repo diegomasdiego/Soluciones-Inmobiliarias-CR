@@ -142,6 +142,11 @@ a.saved-count.is-current { border-color: var(--guaria); color: var(--guaria-2); 
 .facts li { display: inline-flex; align-items: center; gap: 6px; }
 .facts svg { color: var(--ink-3); }
 .pcard-note { margin-top: 10px; font-size: 13.5px; color: var(--guaria-2); background: var(--guaria-soft); padding: 6px 10px; border-radius: 8px; }
+.pcard-note.is-ai { display: flex; gap: 7px; align-items: flex-start; line-height: 1.45; }
+.pcard-note.is-ai svg { flex: none; margin-top: 2px; }
+.ai-box.is-thinking .ai-icon { animation: ai-think 1.2s ease-in-out infinite; }
+@keyframes ai-think { 0%, 100% { opacity: 1; transform: none; } 50% { opacity: .45; transform: scale(.85) rotate(14deg); } }
+@media (prefers-reduced-motion: reduce) { .ai-box.is-thinking .ai-icon { animation: none; } }
 .card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 2.4vw, 32px); }
 .card-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 980px) { .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'r
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { ConvexReactClient, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
+import type { AiSearchResult } from '../../convex/ai';
 import { properties as samples, type Property } from '../data/properties';
 
 const url = import.meta.env.VITE_CONVEX_URL as string | undefined;
@@ -61,6 +62,12 @@ export type LeadInput = {
   page: string;
   website?: string;
 };
+
+/** Asks the AI search (convex/ai.ts) to read a query. 'off' without a database or a model key. */
+export async function aiSearch(q: string, lang: 'en' | 'es'): Promise<AiSearchResult> {
+  if (!convex) return { status: 'off' };
+  return convex.action(api.ai.search, { q, lang });
+}
 
 /** Saves a form request. Returns 'offline' when the site runs without a database. */
 export async function submitLead(lead: LeadInput): Promise<'saved' | 'offline'> {

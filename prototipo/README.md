@@ -42,6 +42,7 @@ Proyecto Convex: **soluciones-inmobiliarias-cr**. Funciones en `convex/`:
 | `access.ts` | Lista del equipo (`ADMIN_EMAILS`) y verificación en cada llamada del panel |
 | `team.ts` | Funciones del panel: listar y filtrar solicitudes, conteos, detalle, cambiar estado, notas |
 | `admin.ts` | Internas, solo desde la terminal: `admin:deleteLeads` (borra solicitudes y sus notas) y `admin:deleteUser` (borra los datos de acceso de una persona) |
+| `ai.ts` | Buscador con IA: `ai:search` lee la búsqueda con un modelo de lenguaje (Claude) y devuelve filtros, las propiedades que mejor encajan y el motivo de cada una. Guarda cada respuesta 24 h y limita las llamadas por minuto y por día |
 | `seed.ts` | `seed:properties`: carga o actualiza las 11 propiedades de ejemplo (por slug) |
 
 ```bash
@@ -61,6 +62,12 @@ npx convex data leads                       # ver las solicitudes recibidas
   ```
   Sin `NOTIFY_FROM` se envía desde `onboarding@resend.dev`, que Resend solo permite hacia el correo de la cuenta de Resend.
 - Las solicitudes solo se leen en el panel del equipo (abajo), con sesión iniciada. Ninguna función pública las devuelve sin sesión.
+- **Buscador con IA:** se activa con la clave de la API de Anthropic en cada entorno. Sin ella, el buscador funciona solo con las reglas.
+  ```powershell
+  Get-Clipboard | npx convex env set ANTHROPIC_API_KEY            # desarrollo
+  Get-Clipboard | npx convex env set ANTHROPIC_API_KEY --prod     # producción
+  ```
+  Opcionales: `AI_SEARCH_MODEL` (por defecto `claude-opus-5-5`), `AI_SEARCH_DAILY_LIMIT` (llamadas al modelo por día de Costa Rica, por defecto 300) y `AI_SEARCH_MINUTE_LIMIT` (por minuto en todo el sitio, por defecto 20). Las búsquedas repetidas en 24 h salen de la base de datos y no cuentan. Cada llamada deja en el registro de Convex el modelo, el tiempo y los tokens usados (no el texto buscado). La tabla `aiSearches` guarda un código derivado de la búsqueda, no el texto.
 - `npm run artifact` compila en modo `artifact` (`.env.artifact`) sin base de datos, porque el visor de artifacts bloquea conexiones externas.
 
 ## Panel del equipo (`#panel`)
@@ -104,7 +111,7 @@ El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con
 | Ruta | Pantalla |
 |---|---|
 | `#home` | Inicio: video de drone, buscador en lenguaje natural, zonas con scroll, verificación, costos, maquinaria, testimonios |
-| `#search` | Listado con filtros y mapa ilustrado sincronizados |
+| `#search` | Listado con buscador con IA, filtros y mapa ilustrado sincronizados |
 | `#property-<slug>` | Ficha: galería, tour 360°, plano interactivo, ubicación, costos, rentabilidad, estado legal, solicitud de visita |
 | `#calculator` / `#calculator-<slug>` | Calculadora de costo real: cierre, hipoteca, impuestos, residencia de inversionista, rentabilidad |
 | `#guides` | Guías para comprar: las cuatro guías y un glosario con buscador |
@@ -124,7 +131,7 @@ El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con
 ```
 src/
   data/        properties.ts (11 propiedades de ejemplo), projects.ts (5 proyectos y el cálculo del plan de pagos), company.ts (zonas con precio por m², asesores, maquinaria, testimonios), about.ts (historia, equipo, aliados), leadOptions.ts (opciones de los formularios), media.json (generado)
-  lib/         router (hash + View Transitions), store (moneda, favoritos, búsqueda), search (parser de lenguaje natural), costs (modelo de costos CR), valuation (estimador de valor para vendedores)
+  lib/         router (hash + View Transitions), store (moneda, favoritos, búsqueda y respuesta de la IA), search (filtros y parser por reglas), costs (modelo de costos CR), valuation (estimador de valor para vendedores)
   components/  piezas reutilizables: tarjeta, mapa, 360°, plano, galería, formulario, cursor, curvas de nivel
   pages/       una por pantalla
   styles/      base.css (tokens), components.css, pages.css
@@ -140,7 +147,7 @@ public/media/  fotos (webp), panorámicas 360° y video
 - **Nosotros:** la historia (fechas e hitos), el equipo de 15 personas (nombres, cargos, idiomas, año de ingreso) y la red de aliados (cantidades y en qué etapa participan) son de ejemplo y viven en `src/data/about.ts`. La página no destaca a ninguna persona: la marca es la empresa. La afiliación a la CCCBR, la inscripción ante SUGEF (art. 15 bis de la Ley 7786) y sus fechas deben confirmarlas el cliente y la revisión legal (COD-9) antes de publicar. El botón "Escribirle a…" solo agrega el nombre de la persona a la solicitud; no la envía a su correo.
 - **Guías:** el contenido vive en `src/data/guides.ts` (bilingüe, separado del diseño para reutilizarlo en COD-18). Se basa en el informe del cliente y se verificó con fuentes oficiales el 14 de noviembre de 2026. Dos datos del informe ya no estaban vigentes y se corrigieron en todo el sitio: el plazo para pedir los incentivos fiscales de la Ley 9996 (20% menos de traspaso, menaje, vehículos) cerró el 14 de julio de 2026, y la retención del 2% a vendedores domiciliados se derogó en octubre de 2025 (queda la del 2,5% a no domiciliados). La calculadora aplica el 20% solo si el usuario indica que ya tiene esos beneficios. Las guías ponen título, descripción y datos estructurados (Article y FAQPage) por página, pero con rutas `#` los buscadores ven una sola dirección: el beneficio completo de SEO llega con rutas reales (COD-18). Todo el texto legal y tributario pasa por la revisión legal (COD-9).
 - **Guardadas y comparador:** la lista vive en el navegador (`localStorage`, clave `sicr.saved`), no en una cuenta; para verla en otro dispositivo se comparte el enlace `#compare-…`, que solo lleva los códigos de las propiedades. Las cifras usan el mismo modelo de `src/lib/costs.ts` que la ficha y la calculadora (préstamo en dólares al 7,5% a 25 años). Una lista sincronizada con cuenta llegaría con el portal de cliente (COD-16).
-- **Buscador "IA":** es un parser por reglas (`src/lib/search.ts`) que entiende inglés y español. En producción se reemplaza por un modelo de lenguaje con el mismo contrato (`texto → filtros + explicación`).
+- **Buscador con IA:** al buscar, las reglas (`src/lib/search.ts`, inglés y español) filtran al instante y, si `ANTHROPIC_API_KEY` está configurada, `convex/ai.ts` le pasa la búsqueda y el catálogo publicado al modelo. Su respuesta reemplaza los filtros (salvo que el visitante ya los haya cambiado), ordena por "Mejor coincidencia" y pone en cada tarjeta elegida el motivo, en el idioma de la página. También muestra los deseos que no son filtros ("calle tranquila") y una nota cuando nada coincide o la zona está fuera del Valle Central. Si el modelo no está configurado, llega a su límite, tarda más de 25 s o falla, quedan las reglas. Los atajos del sitio (zonas, "ver lotes", "aptas para residencia") usan solo las reglas.
 - **Formularios:** guardan la solicitud en Convex y avisan por correo cuando Resend está configurado. En el artifact (sin base de datos) solo validan.
 - **Mapa:** ilustrado, con posiciones aproximadas. Para producción se recomienda MapLibre con teselas reales.
 - **Tour 360° y video:** material libre de ejemplo (ver `CREDITS.md`).

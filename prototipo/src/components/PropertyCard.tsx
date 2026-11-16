@@ -5,7 +5,7 @@ import { m2 } from '../lib/format';
 import { useLang } from '../lib/i18n';
 import { useRouter } from '../lib/router';
 import { Img, Price, SaveButton } from './Basics';
-import { IconArea, IconBath, IconBed, IconCheck, IconLot } from './Icons';
+import { IconArea, IconBath, IconBed, IconCheck, IconLot, IconSpark } from './Icons';
 
 export function Badges({ p, compact }: { p: Property; compact?: boolean }) {
   const { tx } = useLang();
@@ -34,11 +34,13 @@ type Props = {
   p: Property;
   active?: boolean;
   note?: string;
+  /** The note was written by the AI search for this visitor's query. */
+  noteAi?: boolean;
   onHover?: (slug: string | null) => void;
   eager?: boolean;
 };
 
-export function PropertyCard({ p: raw, active, note, onHover, eager }: Props) {
+export function PropertyCard({ p: raw, active, note, noteAi, onHover, eager }: Props) {
   const { navigate } = useRouter();
   const { lang, tx } = useLang();
   const p = localize(raw, lang);
@@ -69,7 +71,12 @@ export function PropertyCard({ p: raw, active, note, onHover, eager }: Props) {
           </div>
           <p className="pcard-loc">{p.district}, {p.canton} · {p.province}</p>
           <Facts p={p} />
-          {note && <p className="pcard-note">{note}</p>}
+          {note && (
+            <p className={`pcard-note${noteAi ? ' is-ai' : ''}`}>
+              {noteAi && <IconSpark size={14} />}
+              <span>{note}</span>
+            </p>
+          )}
         </div>
       </a>
       <SaveButton slug={p.slug} className="pcard-save" />

@@ -99,4 +99,14 @@ export default defineSchema({
     author: v.string(),
     text: v.string(),
   }).index('by_lead', ['leadId']),
+
+  // AI search answers (convex/ai.ts). `key` is a hash of the question, page language, model and
+  // listings, so the visitor's text itself is not stored. Reused for 24 h; also counted for the limits.
+  aiSearches: defineTable({
+    key: v.string(),
+    result: v.optional(v.string()), // JSON answer; unset while the model works or when it failed
+  }).index('by_key', ['key']),
+
+  // Model calls per Costa Rica calendar day, for the daily limit.
+  aiUsage: defineTable({ day: v.string(), count: v.number() }).index('by_day', ['day']),
 });

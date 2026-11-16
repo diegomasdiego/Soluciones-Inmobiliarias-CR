@@ -38,7 +38,8 @@ const chips = {
 };
 
 export function AISearch({ variant = 'hero', id = 'ai-search' }: { variant?: 'hero' | 'inline'; id?: string }) {
-  const { query, runQuery } = useStore();
+  const { query, runQuery, interpretation } = useStore();
+  const thinking = !!interpretation?.pending;
   const { route, navigate } = useRouter();
   const { lang, tx } = useLang();
   const [value, setValue] = useState(variant === 'inline' ? query : '');
@@ -56,13 +57,13 @@ export function AISearch({ variant = 'hero', id = 'ai-search' }: { variant?: 'he
     const s = q.trim();
     if (!s) { setError(tx('Describe what you are looking for, or pick a suggestion.', 'Describa lo que busca, o escoja una sugerencia.')); return; }
     setError('');
-    runQuery(s);
+    runQuery(s, { ai: true, lang });
     if (route.name !== 'search') navigate({ name: 'search' });
   };
 
   return (
     <div className={`ai ai-${variant}`}>
-      <form className="ai-box" role="search" onSubmit={e => { e.preventDefault(); submit(value); }}>
+      <form className={`ai-box${thinking && variant === 'inline' ? ' is-thinking' : ''}`} role="search" onSubmit={e => { e.preventDefault(); submit(value); }}>
         <IconSpark size={20} className="ai-icon" />
         <label htmlFor={id} className="sr-only">{tx('Describe the property you are looking for', 'Describa la propiedad que busca')}</label>
         <div className="ai-field">
