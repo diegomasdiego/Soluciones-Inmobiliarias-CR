@@ -5,6 +5,14 @@ import { v } from 'convex/values';
 
 export const leadStatus = v.union(v.literal('new'), v.literal('contacted'), v.literal('closed'));
 
+// Client portal. Labels live in src/data/portal.ts.
+export const dealKind = v.union(v.literal('purchase'), v.literal('managed'));
+export const DOC_CATEGORIES = ['offer', 'study', 'escrow', 'signing', 'registration', 'identity', 'funds', 'contract', 'report', 'invoice', 'other'] as const;
+/** What a client may upload; the team may use any category. */
+export const CLIENT_DOC_CATEGORIES = ['identity', 'funds', 'other'] as const;
+export const docCategory = v.union(...DOC_CATEGORIES.map(c => v.literal(c)));
+export const ticketStatus = v.union(v.literal('open'), v.literal('scheduled'), v.literal('done'));
+
 export const propertyType = v.union(v.literal('House'), v.literal('Condo'), v.literal('Lot'), v.literal('Farm'), v.literal('Commercial'), v.literal('Pre-sale'));
 export const area = v.union(v.literal('Escazú'), v.literal('Santa Ana'), v.literal('Mora'), v.literal('Belén'), v.literal('Heredia'), v.literal('Alajuela'));
 
@@ -109,4 +117,83 @@ export default defineSchema({
 
   // Model calls per Costa Rica calendar day, for the daily limit.
   aiUsage: defineTable({ day: v.string(), count: v.number() }).index('by_day', ['day']),
+
+  // ---- Client portal (#portal). A "deal" is a purchase in progress or a property the company
+  // manages for its owner. Clients see only the deals their email is on (dealAccess).
+  deals: defineTable({
+    kind: dealKind,
+    title: v.string(),
+    place: v.string(),
+    propertySlug: v.optional(v.string()),
+    clientName: v.string(),
+    /** Language for the emails to the client. */
+    lang: v.union(v.literal('en'), v.literal('es')),
+    advisor: v.string(),
+    priceUsd: v.optional(v.number()),
+    /** Purchase: amount held in escrow. */
+    depositUsd: v.optional(v.number()),
+    /** Managed property: expected monthly rent. */
+    rentUsd: v.optional(v.number()),
+    /** Purchase: index of the current stage (0 offer … 4 registration, 5 = finished). */
+    stage: v.number(),
+    /** Purchase: one date per stage (YYYY-MM-DD, '' when unknown): done on, or expected by. */
+    stageDates: v.array(v.string()),
+    status: v.union(v.literal('active'), v.literal('closed')),
+    updatedAt: v.number(),
+    clientActivityAt: v.optional(v.number()),
+    teamSeenAt: v.optional(v.number()),
+    clientNoticeAt: v.optional(v.number()),
+  }).index('by_updated', ['updatedAt']),
+
+  dealAccess: defineTable({
+    dealId: v.id('deals'),
+    email: v.string(),
+    /** When this person last opened the deal, to mark what is new. */
+    seenAt: v.optional(v.number()),
+  })
+    .index('by_email', ['email'])
+    .index('by_deal', ['dealId']),
+
+  dealUpdates: defineTable({
+    dealId: v.id('deals'),
+    author: v.string(),
+    byClient: v.boolean(),
+    text: v.string(),
+  }).index('by_deal', ['dealId']),
+
+  dealDocs: defineTable({
+    dealId: v.id('deals'),
+    storageId: v.id('_storage'),
+    name: v.string(),
+    category: docCategory,
+    size: v.number(),
+    contentType: v.string(),
+    uploadedBy: v.string(),
+    byClient: v.boolean(),
+  })
+    .index('by_deal', ['dealId'])
+    .index('by_storage', ['storageId']),
+
+  ownerReports: defineTable({
+    dealId: v.id('deals'),
+    month: v.string(), // YYYY-MM
+    incomeUsd: v.number(),
+    feeUsd: v.number(),
+    maintenanceUsd: v.number(),
+    otherUsd: v.number(),
+    nights: v.optional(v.number()),
+    note: v.optional(v.string()),
+  }).index('by_deal_month', ['dealId', 'month']),
+
+  tickets: defineTable({
+    dealId: v.id('deals'),
+    title: v.string(),
+    detail: v.optional(v.string()),
+    status: ticketStatus,
+    costUsd: v.optional(v.number()),
+    scheduledFor: v.optional(v.string()), // YYYY-MM-DD
+    openedBy: v.string(),
+    byClient: v.boolean(),
+    closedAt: v.optional(v.number()),
+  }).index('by_deal', ['dealId']),
 });

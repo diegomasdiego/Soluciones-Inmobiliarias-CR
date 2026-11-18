@@ -144,6 +144,7 @@ export function Footer() {
           <span>{pick(company.office, lang)}</span>
           <span className="mono">{company.phone}</span>
           <span className="mono">{company.email}</span>
+          <Link to={{ name: 'portal' }}>{tx('Client portal', 'Portal de clientes')}</Link>
         </div>
       </div>
       <div className="wrap footer-base">

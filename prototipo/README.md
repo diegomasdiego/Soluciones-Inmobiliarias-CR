@@ -33,13 +33,17 @@ Proyecto Convex: **soluciones-inmobiliarias-cr**. Funciones en `convex/`:
 
 | Archivo | Qué hace |
 |---|---|
-| `schema.ts` | Tablas `properties` (fichas con textos EN/ES, orden y publicación) y `leads` (solicitudes de los formularios) |
+| `schema.ts` | Tablas `properties` (fichas con textos EN/ES, orden y publicación), `leads` (solicitudes de los formularios), las del portal (`deals`, `dealAccess`, `dealUpdates`, `dealDocs`, `ownerReports`, `tickets`) y las del buscador con IA |
 | `properties.ts` | `properties:list`: propiedades publicadas, en orden |
 | `leads.ts` | `leads:create`: guarda una solicitud (valida, recorta, descarta spam con un campo trampa y limita a 3 envíos por correo por hora y 20 por minuto en todo el sitio) y programa el aviso por correo |
 | `notify.ts` | `notify:newLead`: envía al equipo un correo con la solicitud (Resend); "Responder" le escribe directo al cliente |
 | `mail.ts` | Envío de correos con Resend, compartido por los avisos y los códigos de acceso |
-| `auth.ts`, `authEmail.ts`, `auth.config.ts`, `http.ts` | Acceso al panel (Convex Auth): código por correo, correo y contraseña, o Google |
-| `access.ts` | Lista del equipo (`ADMIN_EMAILS`) y verificación en cada llamada del panel |
+| `auth.ts`, `authEmail.ts`, `auth.config.ts` | Acceso al panel y al portal de clientes (Convex Auth): código por correo, correo y contraseña, o Google. Solo entran los correos del equipo y los que el equipo agregó a un expediente |
+| `access.ts` | Lista del equipo (`ADMIN_EMAILS`) y qué expedientes puede ver cada persona, revisado en cada llamada |
+| `portal.ts` | Portal de clientes: sus expedientes, mensajes, subir documentos (PDF, fotos, Word, Excel; hasta 15 MB) y reportar mantenimiento, con límites por hora y por día |
+| `portalTeam.ts` | Lado del equipo: crear expedientes, dar o quitar acceso por correo, etapas y fechas, reportes mensuales, mantenimiento, borrar documentos o expedientes |
+| `portalNotify.ts` | Correos del portal: invitación, aviso al cliente cuando hay novedades (sin detalles, máximo uno cada 30 min) y aviso al equipo cuando el cliente escribe, sube o reporta algo |
+| `http.ts` | Rutas de Convex Auth y la descarga de documentos del portal (solo con sesión y acceso al expediente; los archivos no tienen enlace público) |
 | `team.ts` | Funciones del panel: listar y filtrar solicitudes, conteos, detalle, cambiar estado, notas |
 | `admin.ts` | Internas, solo desde la terminal: `admin:deleteLeads` (borra solicitudes y sus notas) y `admin:deleteUser` (borra los datos de acceso de una persona) |
 | `ai.ts` | Buscador con IA: `ai:search` lee la búsqueda con un modelo de lenguaje (Claude) y devuelve filtros, las propiedades que mejor encajan y el motivo de cada una. Guarda cada respuesta 24 h y limita las llamadas por minuto y por día |
@@ -72,7 +76,24 @@ npx convex data leads                       # ver las solicitudes recibidas
 
 ## Panel del equipo (`#panel`)
 
-Página privada en `https://<dominio>/#panel` (no aparece en el menú y no se indexa). Lista las solicitudes con filtros por estado, interés, fecha y texto; muestra el detalle, permite cambiar el estado (`Nueva` / `Contactada` / `Cerrada`, con quién y cuándo) y escribir notas de seguimiento. Se actualiza sola cuando llega una solicitud. Va en un archivo aparte, así que los visitantes del sitio no lo descargan.
+Página privada en `https://<dominio>/#panel` (no aparece en el menú y no se indexa). Tiene dos secciones:
+
+- **Solicitudes:** lista las solicitudes con filtros por estado, interés, fecha y texto; muestra el detalle, permite cambiar el estado (`Nueva` / `Contactada` / `Cerrada`, con quién y cuándo) y escribir notas de seguimiento. Se actualiza sola cuando llega una solicitud.
+- **Portal de clientes:** un expediente por cada compra en curso o propiedad administrada. Se indica quién lo puede ver (hasta 6 correos), y el equipo ve lo mismo que el cliente más sus controles: etapa y fechas de la compra, novedades, documentos, reportes mensuales y estado de cada arreglo. Marca los expedientes donde el cliente hizo algo nuevo y la última visita de cada persona.
+
+Va en un archivo aparte, así que los visitantes del sitio no lo descargan.
+
+## Portal de clientes (`#portal`)
+
+Área privada en `https://<dominio>/#portal` (enlace en el pie de página; no se indexa). El cliente entra con el correo que el equipo agregó a su expediente, con las mismas tres formas que el panel, y solo ve sus expedientes:
+
+- **Compra:** las cinco etapas (oferta, estudio registral, escrow, firma, inscripción) con qué pasa y qué hace el cliente en cada una, fechas, precio, depósito en escrow y saldo, y los documentos de cada etapa.
+- **Propiedad administrada:** alquiler cobrado, gastos y neto de los últimos 12 meses, gráfico del neto por mes (con tabla), y mantenimiento: lo que está abierto, programado o resuelto, y un formulario para reportar algo.
+- En los dos: mensajes con el equipo y documentos. El cliente puede subir identificación, origen de los fondos u otros; el equipo, cualquier categoría.
+
+`#portal-demo` muestra lo mismo con datos ficticios y sin entrar: sirve para enseñarlo. Lo que se escribe o sube ahí no sale del navegador.
+
+Seguridad: el servidor revisa en cada llamada que el correo con sesión esté en el expediente (o en `ADMIN_EMAILS`); quitar un correo corta el acceso de inmediato. Un expediente ajeno responde igual que uno inexistente. Los documentos se descargan por una ruta que exige la sesión, y se rechazan archivos de más de 15 MB o de otros tipos. Los correos al cliente no llevan montos, mensajes ni archivos: solo avisan que hay novedades.
 
 **Quién entra:** solo los correos de `ADMIN_EMAILS`. El servidor lo revisa en cada consulta, así que quitar un correo de la lista corta el acceso de inmediato.
 
@@ -124,7 +145,9 @@ El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con
 | `#saved` | Guardadas: comparador lado a lado (precio, tamaño, precio por m², gastos de cierre, cuotas según la prima elegida, rentabilidad y estado legal), "solo diferencias", enlace para compartir y solicitud de visitas |
 | `#compare-<slug>,<slug>` | Lista compartida por enlace: se compara igual y se puede guardar en la lista propia |
 | `#contact` | Contacto |
-| `#panel` | Panel privado del equipo (solicitudes) |
+| `#panel` | Panel privado del equipo: solicitudes y expedientes del portal de clientes |
+| `#portal` | Portal de clientes: avance de la compra, documentos, mensajes, reportes y mantenimiento de la propiedad administrada |
+| `#portal-demo` | El portal con datos ficticios, sin entrar |
 
 ## Estructura
 
@@ -132,7 +155,7 @@ El `Dockerfile` de la raíz del repositorio compila este proyecto y lo sirve con
 src/
   data/        properties.ts (11 propiedades de ejemplo), projects.ts (5 proyectos y el cálculo del plan de pagos), company.ts (zonas con precio por m², asesores, maquinaria, testimonios), about.ts (historia, equipo, aliados), leadOptions.ts (opciones de los formularios), media.json (generado)
   lib/         router (hash + View Transitions), store (moneda, favoritos, búsqueda y respuesta de la IA), search (filtros y parser por reglas), costs (modelo de costos CR), valuation (estimador de valor para vendedores)
-  components/  piezas reutilizables: tarjeta, mapa, 360°, plano, galería, formulario, cursor, curvas de nivel
+  components/  piezas reutilizables: tarjeta, mapa, 360°, plano, galería, formulario, cursor, curvas de nivel, entrada (SignIn, compartida por panel y portal); portal/ (vista de un expediente, gráfico de reportes)
   pages/       una por pantalla
   styles/      base.css (tokens), components.css, pages.css
 scripts/       fetch-media.mjs, build-artifact.mjs
@@ -148,6 +171,7 @@ public/media/  fotos (webp), panorámicas 360° y video
 - **Guías:** el contenido vive en `src/data/guides.ts` (bilingüe, separado del diseño para reutilizarlo en COD-18). Se basa en el informe del cliente y se verificó con fuentes oficiales el 14 de noviembre de 2026. Dos datos del informe ya no estaban vigentes y se corrigieron en todo el sitio: el plazo para pedir los incentivos fiscales de la Ley 9996 (20% menos de traspaso, menaje, vehículos) cerró el 14 de julio de 2026, y la retención del 2% a vendedores domiciliados se derogó en octubre de 2025 (queda la del 2,5% a no domiciliados). La calculadora aplica el 20% solo si el usuario indica que ya tiene esos beneficios. Las guías ponen título, descripción y datos estructurados (Article y FAQPage) por página, pero con rutas `#` los buscadores ven una sola dirección: el beneficio completo de SEO llega con rutas reales (COD-18). Todo el texto legal y tributario pasa por la revisión legal (COD-9).
 - **Guardadas y comparador:** la lista vive en el navegador (`localStorage`, clave `sicr.saved`), no en una cuenta; para verla en otro dispositivo se comparte el enlace `#compare-…`, que solo lleva los códigos de las propiedades. Las cifras usan el mismo modelo de `src/lib/costs.ts` que la ficha y la calculadora (préstamo en dólares al 7,5% a 25 años). Una lista sincronizada con cuenta llegaría con el portal de cliente (COD-16).
 - **Buscador con IA:** al buscar, las reglas (`src/lib/search.ts`, inglés y español) filtran al instante y, si `ANTHROPIC_API_KEY` está configurada, `convex/ai.ts` le pasa la búsqueda y el catálogo publicado al modelo. Su respuesta reemplaza los filtros (salvo que el visitante ya los haya cambiado), ordena por "Mejor coincidencia" y pone en cada tarjeta elegida el motivo, en el idioma de la página. También muestra los deseos que no son filtros ("calle tranquila") y una nota cuando nada coincide o la zona está fuera del Valle Central. Si el modelo no está configurado, llega a su límite, tarda más de 25 s o falla, quedan las reglas. Los atajos del sitio (zonas, "ver lotes", "aptas para residencia") usan solo las reglas.
+- **Portal de clientes:** funciona de verdad con Convex (expedientes, acceso, archivos y correos), pero no tiene expedientes cargados: el equipo los crea en el panel. La demostración (`#portal-demo`, datos en `src/data/portal.ts`) usa una compra y un apartamento administrado ficticios. Los textos de las etapas, la comisión de administración del 10% que propone el formulario de reportes y la advertencia sobre transferencias deben confirmarlos el cliente y la revisión legal (COD-9).
 - **Formularios:** guardan la solicitud en Convex y avisan por correo cuando Resend está configurado. En el artifact (sin base de datos) solo validan.
 - **Mapa:** ilustrado, con posiciones aproximadas. Para producción se recomienda MapLibre con teselas reales.
 - **Tour 360° y video:** material libre de ejemplo (ver `CREDITS.md`).

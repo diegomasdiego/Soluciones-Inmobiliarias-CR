@@ -1,25 +1,25 @@
-// Team panel (#panel): private page where the team signs in and follows up on requests.
-// Sign-in: email code, email + password, or Google. Only emails in ADMIN_EMAILS (Convex) get in;
-// the server checks it on every call (convex/access.ts), this page only reflects it.
+// Team panel (#panel): private page where the team signs in, follows up on requests and keeps the
+// client portal up to date (PanelClients). Sign-in: email code, email + password, or Google. Only
+// emails in ADMIN_EMAILS (Convex) get in; the server checks it on every call (convex/access.ts).
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useConvexAuth, useMutation, useQuery } from 'convex/react';
-import { ConvexError } from 'convex/values';
 import { api } from '../../convex/_generated/api';
 import type { Doc, Id } from '../../convex/_generated/dataModel';
 import { LangToggle } from '../components/Chrome';
 import { IconArrowLeft, IconMail, IconPhone, IconSearch } from '../components/Icons';
 import { LogoBadge, LogoLockup } from '../components/Logo';
-import { Topo, type TopoCenter } from '../components/Topo';
+import { googleFlag, SignIn } from '../components/SignIn';
 import { budgets, interests, ways } from '../data/leadOptions';
 import { hasDatabase } from '../lib/data';
 import { useLang, type Lang } from '../lib/i18n';
+import { ago, fmtDate } from '../lib/when';
+import PanelClients from './PanelClients';
 import '../styles/panel.css';
 
 type Lead = Doc<'leads'>;
 type Status = Lead['status'];
 
-const GOOGLE_FLAG = 'sicr.panel.google';
 // es: one request ("Nueva"); esMany: the filter tab ("Nuevas").
 const statuses: { id: Status; en: string; es: string; esMany: string }[] = [
   { id: 'new', en: 'New', es: 'Nueva', esMany: 'Nuevas' },
@@ -32,31 +32,12 @@ const ranges = [
   { id: '30', days: 30, en: 'Last 30 days', es: 'Últimos 30 días' },
   { id: '90', days: 90, en: 'Last 90 days', es: 'Últimos 90 días' },
 ];
-const signInTopo: TopoCenter[] = [{ x: 0.85, y: 0.2, rings: 22, spacing: 26, seed: 1.2 }, { x: 0.1, y: 1, rings: 14, spacing: 30, seed: 3.4 }];
-
 const label = (list: { id: string; en: string; es: string }[], id: string | undefined, lang: Lang) => {
   if (!id) return undefined;
   const item = list.find(x => x.id === id);
   return item ? item[lang] : id;
 };
-const flag = {
-  set: () => { try { sessionStorage.setItem(GOOGLE_FLAG, '1'); } catch { /* storage unavailable */ } },
-  take: () => { try { const v = sessionStorage.getItem(GOOGLE_FLAG); sessionStorage.removeItem(GOOGLE_FLAG); return v === '1'; } catch { return false; } },
-};
 
-function fmtDate(ts: number, lang: Lang) {
-  return new Intl.DateTimeFormat(lang === 'es' ? 'es-CR' : 'en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Costa_Rica' }).format(ts);
-}
-function ago(ts: number, lang: Lang) {
-  const rtf = new Intl.RelativeTimeFormat(lang === 'es' ? 'es' : 'en', { numeric: 'auto' });
-  const min = Math.round((ts - Date.now()) / 60000);
-  if (Math.abs(min) < 60) return rtf.format(min, 'minute');
-  const h = Math.round(min / 60);
-  if (Math.abs(h) < 24) return rtf.format(h, 'hour');
-  const d = Math.round(h / 24);
-  if (Math.abs(d) < 30) return rtf.format(d, 'day');
-  return fmtDate(ts, lang);
-}
 /** WhatsApp link for a phone as typed in the form. Eight digits are taken as a Costa Rica number. */
 function whatsapp(phone: string | undefined) {
   const digits = (phone ?? '').replace(/\D/g, '');
@@ -97,16 +78,50 @@ export default function Panel() {
 function Gate() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   if (isLoading) return <div className="panel-loading" aria-busy="true" />;
-  return isAuthenticated ? <SignedIn /> : <SignIn />;
+  return isAuthenticated ? <SignedIn /> : <SignIn audience="team" />;
 }
 
 function SignedIn() {
   const me = useQuery(api.team.me);
-  useEffect(() => { flag.take(); }, []);
+  useEffect(() => { googleFlag('team').take(); }, []);
   if (me === undefined) return <div className="panel-loading" aria-busy="true" />;
-  if (me === null) return <SignIn />;
+  if (me === null) return <SignIn audience="team" />;
   if (!me.allowed) return <NoAccess email={me.email} />;
-  return <Board email={me.email} />;
+  return <Workspace email={me.email} />;
+}
+
+type View = 'leads' | 'clients';
+const VIEW_KEY = 'sicr.panel.view';
+
+/** The panel's top bar and its two areas: website requests and the client portal. */
+function Workspace({ email }: { email: string | null }) {
+  const { tx } = useLang();
+  const { signOut } = useAuthActions();
+  const [view, setViewState] = useState<View>(() => { try { return sessionStorage.getItem(VIEW_KEY) === 'clients' ? 'clients' : 'leads'; } catch { return 'leads'; } });
+  const setView = (v: View) => { setViewState(v); try { sessionStorage.setItem(VIEW_KEY, v); } catch { /* storage unavailable */ } };
+  const deals = useQuery(api.portalTeam.list);
+  const unread = deals?.filter(d => d.unread).length ?? 0;
+
+  return (
+    <div className="pn">
+      <header className="pn-bar">
+        <a href="#home" className="pn-bar-logo" aria-label={tx('Go to the website', 'Ir al sitio web')}><LogoLockup /></a>
+        <nav className="pn-views" aria-label={tx('Panel sections', 'Secciones del panel')}>
+          <button type="button" aria-pressed={view === 'leads'} onClick={() => setView('leads')}>{tx('Requests', 'Solicitudes')}</button>
+          <button type="button" aria-pressed={view === 'clients'} onClick={() => setView('clients')}>
+            {tx('Client portal', 'Portal de clientes')}
+            {unread > 0 && <span className="pn-views-dot" aria-label={tx(`${unread} with news`, `${unread} con novedades`)}>{unread}</span>}
+          </button>
+        </nav>
+        <div className="pn-bar-tools">
+          <LangToggle />
+          <span className="pn-bar-user" title={email ?? ''}>{email}</span>
+          <button type="button" className="btn btn-ghost pn-bar-out" onClick={() => void signOut()}>{tx('Sign out', 'Salir')}</button>
+        </div>
+      </header>
+      {view === 'leads' ? <Board /> : <PanelClients deals={deals} />}
+    </div>
+  );
 }
 
 function Centered({ children }: { children: ReactNode }) {
@@ -137,253 +152,10 @@ function NoAccess({ email }: { email: string | null }) {
   );
 }
 
-// ---------------------------------------------------------------- sign-in
-
-type Step =
-  | { kind: 'code' }
-  | { kind: 'code-verify'; email: string }
-  | { kind: 'password' }
-  | { kind: 'signup' }
-  | { kind: 'verify'; email: string }
-  | { kind: 'reset' }
-  | { kind: 'reset-verify'; email: string };
-
-function SignIn() {
-  const { tx } = useLang();
-  const { signIn } = useAuthActions();
-  const methods = useQuery(api.team.methods);
-  const [step, setStep] = useState<Step>({ kind: 'code' });
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [googleFailed] = useState(flag.take);
-  const emailOff = methods !== undefined && !methods.email;
-  const googleOff = methods !== undefined && !methods.google;
-  const tab = step.kind === 'code' || step.kind === 'code-verify' ? 'code' : 'password';
-
-  const go = (next: Step) => { setStep(next); setError(null); };
-
-  const explain = (err: unknown, fallback: string) => {
-    const code = err instanceof ConvexError ? String(err.data) : '';
-    if (code === 'not-allowed') return tx('This email does not have access to the panel. Ask the administrator to add it.', 'Este correo no tiene acceso al panel. Pida al administrador que lo agregue.');
-    if (code === 'weak-password') return tx('Use at least 10 characters.', 'Use al menos 10 caracteres.');
-    if (code === 'email') return tx('Enter an email like name@example.com.', 'Escriba un correo como nombre@ejemplo.com.');
-    return fallback;
-  };
-
-  const run = async (e: FormEvent<HTMLFormElement>, provider: string, after: (email: string, signedIn: boolean) => void, fallback: string) => {
-    e.preventDefault();
-    if (busy) return;
-    const form = new FormData(e.currentTarget);
-    const email = String(form.get('email') ?? '').trim().toLowerCase();
-    form.set('email', email);
-    setBusy(true);
-    setError(null);
-    try {
-      const { signingIn } = await signIn(provider, form);
-      after(email, signingIn);
-    } catch (err) {
-      setError(explain(err, fallback));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const google = async () => {
-    setBusy(true);
-    setError(null);
-    flag.set();
-    try {
-      await signIn('google', { redirectTo: '/#panel' });
-    } catch {
-      flag.take();
-      setBusy(false);
-      setError(tx('Could not start Google sign-in.', 'No se pudo iniciar la entrada con Google.'));
-    }
-  };
-
-  const sendFail = emailOff
-    ? tx('Email codes are not set up yet.', 'El envío de códigos por correo aún no está configurado.')
-    : tx('We could not send the code. Try again in a minute.', 'No pudimos enviar el código. Intente de nuevo en un minuto.');
-  const codeFail = tx('That code is wrong or expired. Check it or ask for a new one.', 'El código no es correcto o ya venció. Revíselo o pida uno nuevo.');
-
-  const emailField = (autoComplete = 'username') => (
-    <div className="field">
-      <label htmlFor="pn-email">{tx('Email', 'Correo')}</label>
-      <input id="pn-email" name="email" type="email" required autoComplete={autoComplete} placeholder="nombre@ejemplo.com" />
-    </div>
-  );
-  const codeField = (
-    <div className="field">
-      <label htmlFor="pn-code">{tx('8-digit code', 'Código de 8 dígitos')}</label>
-      <input id="pn-code" name="code" className="pn-code" required inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" maxLength={8} placeholder="12345678" autoFocus />
-    </div>
-  );
-  const sentTo = (email: string) => (
-    <p className="pn-muted pn-sent">{tx('We sent a code to', 'Enviamos un código a')} <strong>{email}</strong>. {tx('It expires in 15 minutes.', 'Vence en 15 minutos.')}</p>
-  );
-  const submit = (en: string, es: string) => (
-    <button type="submit" className="btn btn-accent btn-block" disabled={busy} aria-busy={busy}>{busy ? tx('One moment…', 'Un momento…') : tx(en, es)}</button>
-  );
-
-  let body: ReactNode;
-  switch (step.kind) {
-    case 'code':
-      body = (
-        <form onSubmit={e => run(e, 'email-code', email => go({ kind: 'code-verify', email }), sendFail)}>
-          {emailField()}
-          {emailOff && <p className="pn-note">{tx('Not available yet: email sending (Resend) still needs to be set up.', 'Aún no disponible: falta configurar el envío de correos (Resend).')}</p>}
-          {submit('Email me a code', 'Enviarme un código')}
-        </form>
-      );
-      break;
-    case 'code-verify':
-      body = (
-        <form onSubmit={e => run(e, 'email-code', () => undefined, codeFail)}>
-          {sentTo(step.email)}
-          <input type="hidden" name="email" value={step.email} />
-          {codeField}
-          {submit('Sign in', 'Entrar')}
-          <button type="button" className="pn-link" onClick={() => go({ kind: 'code' })}>{tx('Use another email', 'Usar otro correo')}</button>
-        </form>
-      );
-      break;
-    case 'password':
-      body = (
-        <form onSubmit={e => run(e, 'password', (email, signedIn) => { if (!signedIn) go({ kind: 'verify', email }); }, tx('Wrong email or password.', 'Correo o contraseña incorrectos.'))}>
-          <input type="hidden" name="flow" value="signIn" />
-          {emailField()}
-          <div className="field">
-            <label htmlFor="pn-password">{tx('Password', 'Contraseña')}</label>
-            <input id="pn-password" name="password" type="password" required autoComplete="current-password" />
-          </div>
-          {submit('Sign in', 'Entrar')}
-          <div className="pn-links">
-            <button type="button" className="pn-link" onClick={() => go({ kind: 'signup' })}>{tx('Create a password', 'Crear contraseña')}</button>
-            <button type="button" className="pn-link" onClick={() => go({ kind: 'reset' })}>{tx('Forgot your password?', '¿Olvidó su contraseña?')}</button>
-          </div>
-        </form>
-      );
-      break;
-    case 'signup':
-      body = (
-        <form onSubmit={e => run(e, 'password', (email, signedIn) => { if (!signedIn) go({ kind: 'verify', email }); }, tx(
-          'Could not create the password. If you already have one, sign in or reset it.',
-          'No se pudo crear la contraseña. Si ya tiene una, entre o cámbiela.',
-        ))}>
-          <input type="hidden" name="flow" value="signUp" />
-          <p className="pn-muted">{tx('For team emails only. We will email you a code to confirm it is yours.', 'Solo para correos del equipo. Le enviaremos un código para confirmar que el correo es suyo.')}</p>
-          {emailField()}
-          <div className="field">
-            <label htmlFor="pn-new-password">{tx('New password', 'Contraseña nueva')} <span className="optional">· {tx('at least 10 characters', 'al menos 10 caracteres')}</span></label>
-            <input id="pn-new-password" name="password" type="password" required minLength={10} autoComplete="new-password" />
-          </div>
-          {emailOff && <p className="pn-note">{tx('Not available yet: email sending (Resend) still needs to be set up.', 'Aún no disponible: falta configurar el envío de correos (Resend).')}</p>}
-          {submit('Create and confirm', 'Crear y confirmar')}
-          <button type="button" className="pn-link" onClick={() => go({ kind: 'password' })}>{tx('I already have a password', 'Ya tengo contraseña')}</button>
-        </form>
-      );
-      break;
-    case 'verify':
-      body = (
-        <form onSubmit={e => run(e, 'password', () => undefined, codeFail)}>
-          <input type="hidden" name="flow" value="email-verification" />
-          <input type="hidden" name="email" value={step.email} />
-          <p className="pn-muted">{tx('Confirm your email to finish.', 'Confirme su correo para terminar.')}</p>
-          {sentTo(step.email)}
-          {codeField}
-          {submit('Confirm and sign in', 'Confirmar y entrar')}
-        </form>
-      );
-      break;
-    case 'reset':
-      body = (
-        <form onSubmit={e => run(e, 'password', email => go({ kind: 'reset-verify', email }), sendFail)}>
-          <input type="hidden" name="flow" value="reset" />
-          <p className="pn-muted">{tx('We will email you a code to choose a new password.', 'Le enviaremos un código para elegir una contraseña nueva.')}</p>
-          {emailField()}
-          {submit('Email me a code', 'Enviarme un código')}
-          <button type="button" className="pn-link" onClick={() => go({ kind: 'password' })}>{tx('Back', 'Volver')}</button>
-        </form>
-      );
-      break;
-    case 'reset-verify':
-      body = (
-        <form onSubmit={e => run(e, 'password', () => undefined, codeFail)}>
-          <input type="hidden" name="flow" value="reset-verification" />
-          <input type="hidden" name="email" value={step.email} />
-          {sentTo(step.email)}
-          {codeField}
-          <div className="field">
-            <label htmlFor="pn-reset-password">{tx('New password', 'Contraseña nueva')} <span className="optional">· {tx('at least 10 characters', 'al menos 10 caracteres')}</span></label>
-            <input id="pn-reset-password" name="newPassword" type="password" required minLength={10} autoComplete="new-password" />
-          </div>
-          {submit('Save and sign in', 'Guardar y entrar')}
-        </form>
-      );
-      break;
-  }
-
-  return (
-    <div className="pn-signin">
-      <aside className="pn-signin-brand">
-        <Topo className="pn-signin-topo" centers={signInTopo} color="rgba(232,238,232,.16)" animate speed={0.5} />
-        <a href="#home" className="pn-signin-logo" aria-label={tx('Go to the website', 'Ir al sitio web')}><LogoLockup /></a>
-        <div className="pn-signin-copy">
-          <p className="eyebrow eyebrow-light">{tx('Team only', 'Solo para el equipo')}</p>
-          <h1>{tx('Requests panel', 'Panel de solicitudes')}</h1>
-          <p>{tx('Every request from the website, in one place: who wrote, what they need and how the follow-up is going.', 'Todas las solicitudes del sitio en un solo lugar: quién escribió, qué necesita y cómo va el seguimiento.')}</p>
-        </div>
-      </aside>
-
-      <main className="pn-signin-main">
-        <div className="pn-signin-top"><LangToggle /></div>
-        <div className="pn-signin-card">
-          <h2>{tx('Sign in', 'Entrar')}</h2>
-          {googleFailed && (
-            <p className="field-error" role="alert">{tx(
-              'Google sign-in did not work. Use a Google account that is on the team list.',
-              'No se pudo entrar con Google. Use una cuenta de Google que esté en la lista del equipo.',
-            )}</p>
-          )}
-
-          <button type="button" className="pn-google" onClick={google} disabled={busy || googleOff}>
-            <GoogleMark />
-            <span>{tx('Continue with Google', 'Continuar con Google')}</span>
-          </button>
-          {googleOff && <p className="pn-note">{tx('Not available yet: Google sign-in still needs to be set up.', 'Aún no disponible: falta configurar la entrada con Google.')}</p>}
-
-          <div className="pn-or"><span>{tx('or with your email', 'o con su correo')}</span></div>
-
-          <div className="seg seg-wide pn-tabs" role="group" aria-label={tx('Sign-in method', 'Forma de entrar')}>
-            <button type="button" aria-pressed={tab === 'code'} onClick={() => go({ kind: 'code' })}><span className="seg-label">{tx('Email code', 'Código por correo')}</span></button>
-            <button type="button" aria-pressed={tab === 'password'} onClick={() => go({ kind: 'password' })}><span className="seg-label">{tx('Password', 'Contraseña')}</span></button>
-          </div>
-
-          {body}
-          {error && <p className="field-error" role="alert">{error}</p>}
-        </div>
-        <p className="pn-fine">{tx('Private area of Soluciones Inmobiliarias CR. Access is recorded.', 'Área privada de Soluciones Inmobiliarias CR. Los accesos quedan registrados.')}</p>
-      </main>
-    </div>
-  );
-}
-
-function GoogleMark() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
-      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
-      <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
-      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z" />
-      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
-    </svg>
-  );
-}
-
 // ---------------------------------------------------------------- board
 
-function Board({ email }: { email: string | null }) {
+function Board() {
   const { lang, tx } = useLang();
-  const { signOut } = useAuthActions();
   const [status, setStatus] = useState<Status | 'all'>('all');
   const [interest, setInterest] = useState('all');
   const [range, setRange] = useState('all');
@@ -413,17 +185,6 @@ function Board({ email }: { email: string | null }) {
   const total = counts ? counts.new + counts.contacted + counts.closed : null;
 
   return (
-    <div className="pn">
-      <header className="pn-bar">
-        <a href="#home" className="pn-bar-logo" aria-label={tx('Go to the website', 'Ir al sitio web')}><LogoLockup /></a>
-        <span className="pn-bar-title">{tx('Team panel', 'Panel del equipo')}</span>
-        <div className="pn-bar-tools">
-          <LangToggle />
-          <span className="pn-bar-user" title={email ?? ''}>{email}</span>
-          <button type="button" className="btn btn-ghost pn-bar-out" onClick={() => void signOut()}>{tx('Sign out', 'Salir')}</button>
-        </div>
-      </header>
-
       <div className={`pn-body ${selected ? 'has-selection' : ''}`}>
         <section className="pn-list" aria-labelledby="pn-list-title">
           <div className="pn-list-head">
@@ -493,7 +254,6 @@ function Board({ email }: { email: string | null }) {
             : <div className="pn-detail-empty"><LogoBadge variant="on-light" className="pn-detail-badge" /><p>{tx('Choose a request to see it here.', 'Elija una solicitud para verla aquí.')}</p></div>}
         </section>
       </div>
-    </div>
   );
 }
 

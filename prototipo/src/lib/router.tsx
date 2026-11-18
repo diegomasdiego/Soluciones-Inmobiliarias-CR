@@ -19,11 +19,15 @@ export type Route =
   | { name: 'saved'; shared?: string[] }
   | { name: 'guides' }
   | { name: 'guide'; slug: string }
-  | { name: 'panel' };
+  | { name: 'panel' }
+  /** Client portal; `demo` shows it with fictitious data, without signing in. */
+  | { name: 'portal'; demo?: boolean };
 
 export function parseHash(hash: string): Route {
   const h = decodeURIComponent(hash.replace(/^#/, ''));
   if (h === 'panel') return { name: 'panel' };
+  if (h === 'portal') return { name: 'portal' };
+  if (h === 'portal-demo') return { name: 'portal', demo: true };
   if (h === 'projects') return { name: 'projects' };
   if (h === 'sell') return { name: 'sell' };
   if (h === 'about') return { name: 'about' };
@@ -58,6 +62,7 @@ export function toHash(r: Route): string {
     case 'guides': return 'guides';
     case 'guide': return `guide-${r.slug}`;
     case 'panel': return 'panel';
+    case 'portal': return r.demo ? 'portal-demo' : 'portal';
   }
 }
 

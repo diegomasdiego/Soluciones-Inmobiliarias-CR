@@ -11,6 +11,8 @@ import { properties as samples, type Property } from '../data/properties';
 const url = import.meta.env.VITE_CONVEX_URL as string | undefined;
 const convex = url ? new ConvexReactClient(url) : null;
 export const hasDatabase = convex !== null;
+/** Base URL of the deployment's HTTP routes (convex/http.ts), e.g. portal file downloads. */
+export const convexSiteUrl = url ? url.replace(/\.convex\.cloud\/?$/, '.convex.site') : '';
 
 type Data = {
   properties: Property[];

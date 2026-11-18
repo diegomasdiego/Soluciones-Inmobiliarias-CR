@@ -19,8 +19,9 @@ import Saved from './pages/Saved';
 import Guides from './pages/Guides';
 import Guide from './pages/Guide';
 
-// Team panel: its own chunk, so visitors never download it.
+// Team panel and client portal: their own chunks, so visitors never download them.
 const Panel = lazy(() => import('./pages/Panel'));
+const Portal = lazy(() => import('./pages/Portal'));
 
 function Page() {
   const { route } = useRouter();
@@ -52,10 +53,10 @@ function SkipLink() {
 
 function Layout() {
   const { route } = useRouter();
-  if (route.name === 'panel') {
+  if (route.name === 'panel' || route.name === 'portal') {
     return (
       <Suspense fallback={<div className="panel-loading" aria-busy="true" />}>
-        <Panel />
+        {route.name === 'panel' ? <Panel /> : <Portal demo={route.demo} key={route.demo ? 'demo' : 'live'} />}
       </Suspense>
     );
   }
