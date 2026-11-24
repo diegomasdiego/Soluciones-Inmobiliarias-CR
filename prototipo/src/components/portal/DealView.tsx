@@ -1,3 +1,4 @@
+'use client';
 // One deal in the client portal: a purchase (stages, figures, documents, messages) or a managed
 // property (monthly reports, maintenance, documents, messages). Purely presentational: the live
 // portal, the demo and the team panel pass the data and the actions, and the panel adds its

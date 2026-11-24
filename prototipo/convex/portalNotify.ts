@@ -38,7 +38,7 @@ export const invite = internalAction({
     const c = await ctx.runQuery(internal.portalNotify.context, { dealId });
     if (!c) return;
     const es = c.deal.lang === 'es';
-    const link = `${site()}/#portal`;
+    const link = `${site()}${es ? '/es' : ''}/portal`;
     const what = c.deal.kind === 'purchase'
       ? (es ? `el avance de la compra de ${c.deal.title}` : `the progress of your purchase of ${c.deal.title}`)
       : (es ? `los reportes y el mantenimiento de ${c.deal.title}` : `the reports and maintenance of ${c.deal.title}`);
@@ -67,7 +67,7 @@ export const toClients = internalAction({
     const { text, html } = layout(
       es ? `Novedades: ${c.deal.title}` : `News: ${c.deal.title}`,
       [es ? 'El equipo actualizó su expediente en el portal de cliente.' : 'The team updated your file in the client portal.'],
-      `${site()}/#portal`,
+      `${site()}${es ? '/es' : ''}/portal`,
       es ? 'Ver en el portal' : 'See it in the portal',
     );
     await sendEmail({ to: c.emails, subject: es ? `Novedades en el portal · ${c.deal.title}` : `News in your portal · ${c.deal.title}`, text, html });
@@ -90,7 +90,7 @@ export const toTeam = internalAction({
     if (!c) return;
     const lines = [`${by} ${whatLabel[what] ?? 'hizo un cambio'} en "${c.deal.title}" (${c.deal.clientName}).`];
     if (what === 'message' && c.lastClientMessage) lines.push(c.lastClientMessage);
-    const { text, html } = layout(`Portal de clientes: ${c.deal.title}`, lines, `${site()}/#panel`, 'Abrir el panel');
+    const { text, html } = layout(`Portal de clientes: ${c.deal.title}`, lines, `${site()}/es/panel`, 'Abrir el panel');
     await sendEmail({ to, replyTo: [by], subject: `Portal: ${c.deal.clientName} ${whatLabel[what] ?? 'hizo un cambio'}`, text, html });
   },
 });

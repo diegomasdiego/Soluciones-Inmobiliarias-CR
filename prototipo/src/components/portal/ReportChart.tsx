@@ -1,3 +1,4 @@
+'use client';
 // Net income per month for a managed property: one series (bars), hover or focus a month to see
 // its breakdown. The same figures are available as a table under the chart.
 import { useEffect, useRef, useState } from 'react';

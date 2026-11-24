@@ -1,4 +1,4 @@
-// Team panel (#panel): read and follow up on requests. Every function that touches leads checks
+// Team panel (/panel): read and follow up on requests. Every function that touches leads checks
 // the signed-in user against ADMIN_EMAILS (requireTeam), so leads stay unreadable without signing in.
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { ConvexError, v } from 'convex/values';

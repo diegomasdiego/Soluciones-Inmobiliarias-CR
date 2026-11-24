@@ -1,116 +1,215 @@
-// Illustrated map of the western Central Valley. Pins are HTML (crisp text), roads are SVG,
-// terrain is the contour-line motif. Positions use a simple lat/lng projection.
-import { useState } from 'react';
+'use client';
+// Real map (MapLibre GL with OpenFreeMap's open tiles, no key needed). Listings are price pins,
+// or dots on the small maps; extra points (the office, a project) are labelled dots. The map
+// library loads only when a map is on the page, and the view fits whatever is shown.
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import type { Map as MapLibreMap, Marker } from 'maplibre-gl';
 import type { Property } from '../data/properties';
-import { moneyShort } from '../lib/format';
-import { useRouter } from '../lib/router';
 import { localize } from '../data/properties.es';
+import { moneyShort } from '../lib/format';
 import { useLang } from '../lib/i18n';
+import { useRouter } from '../lib/router';
 import { useStore } from '../lib/store';
 import { Img, Price } from './Basics';
-import { IconArrow, IconClose, IconPlane } from './Icons';
-import { Topo, type TopoCenter } from './Topo';
+import { IconArrow, IconClose } from './Icons';
 
-const B = { latMax: 10.065, latMin: 9.885, lngMin: -84.285, lngMax: -84.065 };
-export const project = (lat: number, lng: number) => ({
-  x: ((lng - B.lngMin) / (B.lngMax - B.lngMin)) * 100,
-  y: ((B.latMax - lat) / (B.latMax - B.latMin)) * 100,
-});
+const STYLE = 'https://tiles.openfreemap.org/styles/positron';
+const CENTER: [number, number] = [-84.16, 9.96];
+const SJO: [number, number] = [-84.2088, 9.9939];
 
-const roads: { name: string; major?: boolean; pts: [number, number][] }[] = [
-  { name: 'Ruta 27', major: true, pts: [[9.935, -84.065], [9.938, -84.1], [9.942, -84.135], [9.947, -84.16], [9.95, -84.175], [9.94, -84.19], [9.93, -84.215], [9.92, -84.24], [9.912, -84.265], [9.905, -84.285]] },
-  { name: 'Ruta 1', major: true, pts: [[9.938, -84.07], [9.955, -84.1], [9.965, -84.13], [9.975, -84.16], [9.985, -84.185], [9.995, -84.205], [10.008, -84.215], [10.02, -84.222], [10.035, -84.24], [10.05, -84.26], [10.065, -84.28]] },
-  { name: 'Ruta 3', pts: [[9.945, -84.07], [9.965, -84.09], [9.985, -84.105], [9.998, -84.117], [10.012, -84.13], [10.02, -84.16], [10.018, -84.205]] },
-  { name: 'Ruta 121', pts: [[9.925, -84.12], [9.919, -84.14], [9.922, -84.16], [9.932, -84.182], [9.925, -84.21]] },
-  { name: 'Ruta 122', pts: [[9.999, -84.117], [10.03, -84.11], [10.065, -84.1]] },
-];
-
-const places: { name: string; lat: number; lng: number; big?: boolean }[] = [
-  { name: 'San José', lat: 9.931, lng: -84.083, big: true },
-  { name: 'Escazú', lat: 9.912, lng: -84.14, big: true },
-  { name: 'Santa Ana', lat: 9.925, lng: -84.19, big: true },
-  { name: 'Ciudad Colón', lat: 9.905, lng: -84.245 },
-  { name: 'Belén', lat: 9.984, lng: -84.172 },
-  { name: 'Heredia', lat: 10.006, lng: -84.12, big: true },
-  { name: 'Alajuela', lat: 10.024, lng: -84.214, big: true },
-  { name: 'Cerros de Escazú', lat: 9.892, lng: -84.13 },
-];
-
-const terrain: TopoCenter[] = [
-  { x: 0.66, y: 1.1, rings: 18, spacing: 30, seed: 1.2 },
-  { x: 0.8, y: -0.3, rings: 22, spacing: 34, seed: 2.6 },
-  { x: 0.18, y: -0.45, rings: 24, spacing: 34, seed: 0.4 },
-];
-
+type Point = { id: string; label: string; lat: number; lng: number; showLabel?: boolean };
 type Props = {
   items: Property[];
   /** Extra labelled dots that are not listings (for example, a project's location). */
-  points?: { id: string; label: string; lat: number; lng: number; showLabel?: boolean }[];
+  points?: Point[];
   active?: string | null;
   onHover?: (slug: string | null) => void;
   mini?: boolean;
   className?: string;
 };
 
+const es = {
+  'NavigationControl.ZoomIn': 'Acercar',
+  'NavigationControl.ZoomOut': 'Alejar',
+  'AttributionControl.ToggleAttribution': 'Ver créditos del mapa',
+  'CooperativeGesturesHandler.WindowsHelpText': 'Use Ctrl + rueda del mouse para acercar el mapa',
+  'CooperativeGesturesHandler.MacHelpText': 'Use ⌘ + desplazamiento para acercar el mapa',
+  'CooperativeGesturesHandler.MobileHelpText': 'Use dos dedos para mover el mapa',
+};
+
+/** Tints the light base map toward the site's palette (water, parks, background). */
+function tint(map: MapLibreMap) {
+  for (const layer of map.getStyle().layers ?? []) {
+    const id = layer.id.toLowerCase();
+    try {
+      if (layer.type === 'background') map.setPaintProperty(layer.id, 'background-color', '#EEF1EC');
+      else if (layer.type === 'fill' && id.includes('water')) map.setPaintProperty(layer.id, 'fill-color', '#CBDCD6');
+      else if (layer.type === 'fill' && /park|wood|forest|grass|landcover/.test(id)) map.setPaintProperty(layer.id, 'fill-color', '#DDE7DA');
+    } catch { /* a layer without that property */ }
+  }
+}
+
 export function MapView({ items, points = [], active, onHover, mini, className }: Props) {
   const { currency, rate } = useStore();
   const { navigate } = useRouter();
   const { lang, tx } = useLang();
+  const box = useRef<HTMLDivElement>(null);
+  const map = useRef<MapLibreMap | null>(null);
+  const lib = useRef<typeof import('maplibre-gl') | null>(null);
+  const markers = useRef(new Map<string, HTMLElement>());
+  const placed = useRef<Marker[]>([]);
+  const fitted = useRef(false);
+  const hover = useRef(onHover);
+  hover.current = onHover;
+  const [ready, setReady] = useState(false);
+  const [shown, setShown] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+
+  // What is drawn, as one key, so pins are rebuilt only when it really changes.
+  const key = useMemo(
+    () => JSON.stringify([items.map(p => [p.slug, p.priceUsd]), points.map(p => [p.id, p.lat, p.lng, p.label, !!p.showLabel]), currency, rate, mini, lang]),
+    [items, points, currency, rate, mini, lang],
+  );
+  const latest = useRef({ items, points });
+  latest.current = { items, points };
+
+  // Create the map once (again if the language changes, for the control labels).
+  useEffect(() => {
+    let cancelled = false;
+    let instance: MapLibreMap | undefined;
+    import('maplibre-gl')
+      .then(ml => {
+        if (cancelled || !box.current) return;
+        lib.current = ml;
+        // The worker is served from public/maplibre (scripts/copy-map-worker.mjs).
+        ml.setWorkerUrl(`/maplibre/worker-${ml.getVersion()}.mjs`);
+        instance = new ml.Map({
+          container: box.current,
+          style: STYLE,
+          center: CENTER,
+          zoom: 10.6,
+          attributionControl: { compact: true },
+          cooperativeGestures: !!mini,
+          dragRotate: false,
+          touchPitch: false,
+          ...(lang === 'es' ? { locale: es } : null),
+        });
+        instance.touchZoomRotate.disableRotation();
+        instance.keyboard.disableRotation();
+        if (!mini) instance.addControl(new ml.NavigationControl({ showCompass: false }), 'top-right');
+        // Pins can go on right away; the base map fades in once its style has arrived.
+        instance.on('style.load', () => { if (!cancelled && instance) { tint(instance); setShown(true); } });
+        instance.on('click', () => setSelected(null));
+        map.current = instance;
+        setReady(true);
+      })
+      .catch(() => setFailed(true));
+    return () => {
+      cancelled = true;
+      instance?.remove();
+      map.current = null;
+      markers.current.clear();
+      placed.current = [];
+      fitted.current = false;
+      setReady(false);
+      setShown(false);
+    };
+  }, [mini, lang]);
+
+  // Pins and dots, then fit the view to them.
+  useEffect(() => {
+    const m = map.current;
+    const ml = lib.current;
+    if (!ready || !m || !ml) return;
+    const { items: list, points: extra } = latest.current;
+    placed.current.forEach(mk => mk.remove());
+    placed.current = [];
+    markers.current.clear();
+
+    const place = (el: HTMLElement, at: [number, number], anchor: 'bottom' | 'center') => {
+      placed.current.push(new ml.Marker({ element: el, anchor }).setLngLat(at).addTo(m));
+    };
+
+    for (const p of list) {
+      const price = moneyShort(p.priceUsd, currency, rate);
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = mini ? 'mpin mpin-dot' : 'mpin';
+      el.setAttribute('aria-label', `${p.title}, ${price}`);
+      if (mini) el.tabIndex = -1;
+      else el.textContent = price;
+      el.addEventListener('mouseenter', () => hover.current?.(p.slug));
+      el.addEventListener('mouseleave', () => hover.current?.(null));
+      el.addEventListener('click', e => { e.stopPropagation(); if (!mini) setSelected(p.slug); });
+      markers.current.set(p.slug, el);
+      place(el, [p.lng, p.lat], mini ? 'center' : 'bottom');
+    }
+    for (const pt of extra) {
+      const el = document.createElement('span');
+      el.className = 'mpin-point';
+      el.setAttribute('role', 'img');
+      el.setAttribute('aria-label', pt.label);
+      el.innerHTML = '<span class="mpin-point-dot"></span>';
+      if (pt.showLabel) {
+        const label = document.createElement('span');
+        label.className = 'mpin-point-label';
+        label.textContent = pt.label;
+        el.appendChild(label);
+      }
+      place(el, [pt.lng, pt.lat], 'center');
+    }
+    if (!mini) {
+      const el = document.createElement('span');
+      el.className = 'mpin-place';
+      el.textContent = 'SJO';
+      el.setAttribute('aria-hidden', 'true');
+      place(el, SJO, 'center');
+    }
+
+    const coords: [number, number][] = [...list.map(p => [p.lng, p.lat] as [number, number]), ...extra.map(p => [p.lng, p.lat] as [number, number])];
+    const fit = (duration: number) => {
+      const { clientWidth: w, clientHeight: h } = m.getContainer();
+      if (w < 60 || h < 60) return; // hidden (the list view on phones); fitted again when shown
+      if (coords.length === 1) m.easeTo({ center: coords[0], zoom: mini ? 13.5 : 13, duration });
+      else if (coords.length > 1) {
+        const bounds = new ml.LngLatBounds(coords[0], coords[0]);
+        coords.forEach(c => bounds.extend(c));
+        m.fitBounds(bounds, { padding: mini ? 36 : { top: 70, bottom: 50, left: 50, right: 50 }, maxZoom: 14, duration });
+      }
+    };
+    fit(fitted.current ? 600 : 0);
+    fitted.current = true;
+    // When a hidden map is shown (phones switch between list and map), frame the pins again.
+    let wasHidden = m.getContainer().clientWidth < 60;
+    const onResize = () => {
+      const hidden = m.getContainer().clientWidth < 60;
+      if (wasHidden && !hidden) fit(0);
+      wasHidden = hidden;
+    };
+    m.on('resize', onResize);
+    return () => { m.off('resize', onResize); };
+  }, [ready, key, currency, rate, mini]);
+
+  // Highlight the pin of the card under the pointer, or the one opened.
+  useEffect(() => {
+    for (const [slug, el] of markers.current) {
+      const on = slug === active || slug === selected;
+      el.classList.toggle('is-active', on);
+      const wrapper = el.closest<HTMLElement>('.maplibregl-marker') ?? el;
+      wrapper.style.zIndex = on ? '3' : '';
+    }
+  }, [active, selected, ready, key]);
+
   const found = items.find(p => p.slug === selected);
   const sel = found && localize(found, lang);
-  const airport = project(9.9939, -84.2088);
 
   return (
-    <div className={`map ${mini ? 'map-mini' : ''} ${className ?? ''}`} onClick={() => setSelected(null)}>
-      <Topo centers={terrain} color="rgba(30,74,59,.22)" className="map-topo" />
-      <svg className="map-roads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        {roads.map(r => {
-          const d = r.pts.map(([la, ln], i) => { const p = project(la, ln); return `${i ? 'L' : 'M'}${p.x.toFixed(2)},${p.y.toFixed(2)}`; }).join(' ');
-          return (
-            <g key={r.name}>
-              <path d={d} className="road-casing" strokeWidth={r.major ? 7 : 4.5} vectorEffect="non-scaling-stroke" />
-              <path d={d} className={r.major ? 'road road-major' : 'road'} strokeWidth={r.major ? 3.2 : 2} vectorEffect="non-scaling-stroke" />
-            </g>
-          );
-        })}
-      </svg>
-      {places.map(pl => {
-        const p = project(pl.lat, pl.lng);
-        return <span key={pl.name} className={`map-place ${pl.big ? 'is-big' : ''}`} style={{ left: `${p.x}%`, top: `${p.y}%` }}>{pl.name}</span>;
-      })}
-      <span className="map-airport" style={{ left: `${airport.x}%`, top: `${airport.y}%` }}><IconPlane size={14} /> SJO</span>
-      <span className="map-north" aria-hidden="true">N ↑ · {tx('Poás volcano 15 km', 'Volcán Poás a 15 km')}</span>
-
-      {items.map(p => {
-        const pos = project(p.lat, p.lng);
-        const isActive = active === p.slug || selected === p.slug;
-        return (
-          <button
-            key={p.slug}
-            type="button"
-            className={`pin ${isActive ? 'is-active' : ''}`}
-            style={{ left: `${pos.x}%`, top: `${pos.y}%`, zIndex: isActive ? 30 : 10 }}
-            onMouseEnter={() => onHover?.(p.slug)}
-            onMouseLeave={() => onHover?.(null)}
-            onClick={e => { e.stopPropagation(); if (mini) return; setSelected(p.slug); }}
-            aria-label={`${p.title}, ${moneyShort(p.priceUsd, currency, rate)}`}
-          >
-            {mini ? <span className="pin-dot" /> : moneyShort(p.priceUsd, currency, rate)}
-          </button>
-        );
-      })}
-
-      {points.map(pt => {
-        const pos = project(pt.lat, pt.lng);
-        return (
-          <span key={pt.id} className="pin is-active map-point" style={{ left: `${pos.x}%`, top: `${pos.y}%`, zIndex: 30 }} role="img" aria-label={pt.label}>
-            <span className="pin-dot" />
-            {pt.showLabel && <span className="map-point-label" aria-hidden="true">{pt.label}</span>}
-          </span>
-        );
-      })}
+    <div className={`map ${mini ? 'map-mini' : ''} ${shown ? 'is-ready' : ''} ${className ?? ''}`}>
+      <div ref={box} className="map-canvas" aria-label={tx('Map', 'Mapa')} role="region" />
+      {failed && <p className="map-failed">{tx('The map could not load here.', 'No se pudo cargar el mapa aquí.')}</p>}
 
       <AnimatePresence>
         {sel && !mini && (
@@ -121,7 +220,6 @@ export function MapView({ items, points = [], active, onHover, mini, className }
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-            onClick={e => e.stopPropagation()}
           >
             <button type="button" className="map-pop-close" aria-label={tx('Close', 'Cerrar')} onClick={() => setSelected(null)}><IconClose size={16} /></button>
             <Img name={sel.photos[0]} alt={sel.title} />
@@ -134,7 +232,7 @@ export function MapView({ items, points = [], active, onHover, mini, className }
           </motion.div>
         )}
       </AnimatePresence>
-      {!mini && <p className="map-note">{tx('Illustrated map · positions approximate', 'Mapa ilustrado · ubicaciones aproximadas')}</p>}
+      {!mini && <p className="map-note">{tx('Approximate locations', 'Ubicaciones aproximadas')}</p>}
     </div>
   );
 }

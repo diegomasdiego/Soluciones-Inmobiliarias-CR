@@ -4,14 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "predev": "node scripts/copy-map-worker.mjs",
+    "dev": "next dev -p 5173",
+    "prebuild": "node scripts/copy-map-worker.mjs",
+    "build": "next build",
+    "start": "next start",
     "typecheck": "tsc --noEmit",
     "media": "node scripts/fetch-media.mjs",
     "logo": "node scripts/trace-logo.mjs",
     "brand": "node scripts/make-brand-assets.mjs",
-    "preview": "vite preview",
-    "artifact": "vite build --mode artifact && node scripts/build-artifact.mjs",
     "convex": "convex dev",
     "seed": "convex run seed:properties"
   },
@@ -20,7 +21,9 @@
     "@auth/core": "^0.41.3",
     "@convex-dev/auth": "^0.0.96",
     "convex": "^1.46.0",
+    "maplibre-gl": "6.19.0",
     "motion": "^13.4.1",
+    "next": "16.4.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
@@ -28,10 +31,8 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.1",
     "potrace": "^2.1.8",
     "sharp": "^0.35.4",
-    "typescript": "^7.0.2",
-    "vite": "^8.3.0"
+    "typescript": "^7.0.2"
   }
 }

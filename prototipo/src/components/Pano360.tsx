@@ -1,3 +1,4 @@
+'use client';
 // Lightweight 360° viewer: one WebGL fragment shader samples an equirectangular panorama.
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from 'react';
 import { useLang } from '../lib/i18n';

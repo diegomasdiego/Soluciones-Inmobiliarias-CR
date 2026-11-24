@@ -1,3 +1,4 @@
+'use client';
 // Pieces of the projects and pre-sales pages: card, progress, milestone track, unit and lot plans, payment plan.
 import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 import { animate, motion, useInView } from 'motion/react';
@@ -59,7 +60,7 @@ export function ProjectCard({ p }: { p: Project }) {
   const unitWord = p.types.every(t => t.lot) ? tx('lots', 'lotes') : tx('units', 'unidades');
   return (
     <article className="proj-card">
-      <button ref={media} type="button" className="proj-card-media" onClick={() => navigate({ name: 'project', slug: p.slug }, { morph: media.current })} data-cursor={tx('View', 'Ver')} aria-label={tx(`Open ${p.name}`, `Abrir ${p.name}`)}>
+      <button ref={media} type="button" className="proj-card-media" onClick={() => navigate({ name: 'project', slug: p.slug })} data-cursor={tx('View', 'Ver')} aria-label={tx(`Open ${p.name}`, `Abrir ${p.name}`)}>
         <Img name={p.hero} alt="" />
         <StageChip stage={p.stage} />
       </button>

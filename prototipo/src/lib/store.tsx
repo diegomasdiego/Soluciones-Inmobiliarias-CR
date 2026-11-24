@@ -1,3 +1,4 @@
+'use client';
 // App-wide state: currency, saved properties, the current search and a small toast queue.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { company } from '../data/company';
@@ -60,8 +61,11 @@ function save(key: string, value: unknown) {
 }
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrencyState] = useState<Currency>(() => load('sicr.currency', 'USD'));
-  const [saved, setSaved] = useState<string[]>(() => load('sicr.saved', []));
+  // The page is first drawn on the server with the defaults; the visitor's own currency and saved
+  // list are read once it is in the browser, so both renders match.
+  const [currency, setCurrencyState] = useState<Currency>('USD');
+  const [saved, setSaved] = useState<string[]>([]);
+  const [restored, setRestored] = useState(false);
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [query, setQuery] = useState('');
   const [interpretation, setInterpretation] = useState<Interpretation | null>(null);
@@ -69,8 +73,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<string | null>(null);
   const timer = useRef<number | undefined>(undefined);
 
-  useEffect(() => save('sicr.currency', currency), [currency]);
-  useEffect(() => save('sicr.saved', saved), [saved]);
+  useEffect(() => {
+    setCurrencyState(load<Currency>('sicr.currency', 'USD'));
+    setSaved(prev => [...new Set([...load<string[]>('sicr.saved', []), ...prev])]);
+    setRestored(true);
+  }, []);
+  useEffect(() => { if (restored) save('sicr.currency', currency); }, [currency, restored]);
+  useEffect(() => { if (restored) save('sicr.saved', saved); }, [saved, restored]);
 
   const notify = useCallback((msg: string) => {
     setToast(msg);

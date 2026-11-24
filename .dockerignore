@@ -6,3 +6,5 @@ prototipo/dist
 prototipo/artifact
 *.pdf
 *.log
+prototipo/.next
+prototipo/public/maplibre

@@ -1,4 +1,4 @@
-// Client portal (#portal): what a signed-in client may read and do on their own deals.
+// Client portal (/portal): what a signed-in client may read and do on their own deals.
 // Every function checks the deal against the signed-in email (access.ts: dealFor); team members
 // may use these too (they see every deal). Team-only functions live in portalTeam.ts.
 import { ConvexError, v } from 'convex/values';

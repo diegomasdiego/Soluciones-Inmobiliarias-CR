@@ -1,3 +1,4 @@
+'use client';
 // Site chrome: header, footer, language switch, custom cursor, toast and scroll reveal.
 import { useEffect, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion, useMotionValue, useSpring } from 'motion/react';

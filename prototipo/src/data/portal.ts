@@ -1,4 +1,4 @@
-// Client portal: the purchase stages, labels, and the sample files shown at #portal-demo.
+// Client portal: the purchase stages, labels, and the sample files shown at /portal/demo.
 // The live portal reads deals from Convex (convex/portal.ts); everything here is display text
 // or fictitious sample data. Stage texts are general information and go through the legal review (COD-9).
 import type { L } from '../lib/i18n';

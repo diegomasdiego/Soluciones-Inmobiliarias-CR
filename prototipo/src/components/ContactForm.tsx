@@ -1,3 +1,4 @@
+'use client';
 import { useId, useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ConvexError } from 'convex/values';
@@ -59,7 +60,7 @@ export function ContactForm({ context, defaultInterest = 'home', compact, dark, 
         via: values.via,
         context,
         lang,
-        page: window.location.hash || '#home',
+        page: window.location.pathname,
         website: honeypot.current?.value || undefined,
       });
       setStatus(result);

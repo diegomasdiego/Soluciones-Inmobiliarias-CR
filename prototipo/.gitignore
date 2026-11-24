@@ -10,3 +10,7 @@ build
 *.pdf
 .vscode
 .idea
+.next
+next-env.d.ts
+tsconfig.tsbuildinfo
+public/maplibre

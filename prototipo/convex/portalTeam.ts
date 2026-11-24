@@ -1,4 +1,4 @@
-// Client portal, team side (#panel → Clients): create deals, give clients access, move a purchase
+// Client portal, team side (/panel → Client portal): create deals, give clients access, move a purchase
 // through its stages, and keep owners' monthly reports and maintenance up to date.
 // Every function requires a team member (ADMIN_EMAILS).
 import { ConvexError, v } from 'convex/values';

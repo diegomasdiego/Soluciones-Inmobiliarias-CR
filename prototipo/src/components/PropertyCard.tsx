@@ -1,9 +1,10 @@
+'use client';
 import { useRef } from 'react';
 import { isResidencyEligible, type Property } from '../data/properties';
 import { localize, typeLabel } from '../data/properties.es';
 import { m2 } from '../lib/format';
 import { useLang } from '../lib/i18n';
-import { useRouter } from '../lib/router';
+import { Link } from '../lib/router';
 import { Img, Price, SaveButton } from './Basics';
 import { IconArea, IconBath, IconBed, IconCheck, IconLot, IconSpark } from './Icons';
 
@@ -41,11 +42,9 @@ type Props = {
 };
 
 export function PropertyCard({ p: raw, active, note, noteAi, onHover, eager }: Props) {
-  const { navigate } = useRouter();
   const { lang, tx } = useLang();
   const p = localize(raw, lang);
   const imgRef = useRef<HTMLDivElement>(null);
-  const open = () => navigate({ name: 'property', slug: p.slug }, { morph: imgRef.current });
 
   return (
     <article
@@ -53,10 +52,9 @@ export function PropertyCard({ p: raw, active, note, noteAi, onHover, eager }: P
       onMouseEnter={() => onHover?.(p.slug)}
       onMouseLeave={() => onHover?.(null)}
     >
-      <a
-        href={`#property-${p.slug}`}
+      <Link
+        to={{ name: 'property', slug: p.slug }}
         className="pcard-link"
-        onClick={e => { if (e.metaKey || e.ctrlKey) return; e.preventDefault(); open(); }}
         data-cursor={tx('View', 'Ver')}
       >
         <div className="pcard-media" ref={imgRef}>
@@ -78,7 +76,7 @@ export function PropertyCard({ p: raw, active, note, noteAi, onHover, eager }: P
             </p>
           )}
         </div>
-      </a>
+      </Link>
       <SaveButton slug={p.slug} className="pcard-save" />
     </article>
   );

@@ -1,3 +1,4 @@
+'use client';
 // Topographic contour lines drawn on a canvas: the brand's graphic motif.
 import { useEffect, useRef } from 'react';
 

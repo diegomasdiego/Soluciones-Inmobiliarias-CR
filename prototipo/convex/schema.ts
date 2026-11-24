@@ -118,7 +118,7 @@ export default defineSchema({
   // Model calls per Costa Rica calendar day, for the daily limit.
   aiUsage: defineTable({ day: v.string(), count: v.number() }).index('by_day', ['day']),
 
-  // ---- Client portal (#portal). A "deal" is a purchase in progress or a property the company
+  // ---- Client portal (/portal). A "deal" is a purchase in progress or a property the company
   // manages for its owner. Clients see only the deals their email is on (dealAccess).
   deals: defineTable({
     kind: dealKind,

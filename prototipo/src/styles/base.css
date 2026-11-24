@@ -19,9 +19,9 @@
   --line-2: #B9C2B8;
   --piedra: #9AA39C;
   --danger: #B3261E;
-  --serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
-  --sans: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+  --serif: var(--font-serif, 'Instrument Serif'), 'Iowan Old Style', Georgia, serif;
+  --sans: var(--font-sans, 'Hanken Grotesk'), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: var(--font-mono, 'IBM Plex Mono'), ui-monospace, SFMono-Regular, Consolas, monospace;
   --gutter: clamp(16px, 4vw, 48px);
   --header-h: 72px;
   --ease: cubic-bezier(.2, .8, .2, 1);

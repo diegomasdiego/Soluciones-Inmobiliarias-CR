@@ -1,4 +1,5 @@
-// Sign-in screen shared by the team panel (#panel) and the client portal (#portal):
+'use client';
+// Sign-in screen shared by the team panel (/panel) and the client portal (/portal):
 // email code, email + password, or Google. Who gets in is decided on the server (convex/auth.ts):
 // team emails (ADMIN_EMAILS) and emails the team added to a deal.
 import { useState, type FormEvent, type ReactNode } from 'react';
@@ -7,6 +8,8 @@ import { useQuery } from 'convex/react';
 import { ConvexError } from 'convex/values';
 import { api } from '../../convex/_generated/api';
 import { useLang } from '../lib/i18n';
+import { Link } from '../lib/router';
+import { toPath } from '../lib/routes';
 import { LangToggle } from './Chrome';
 import { LogoLockup } from './Logo';
 import { Topo, type TopoCenter } from './Topo';
@@ -34,7 +37,7 @@ type Step =
   | { kind: 'reset-verify'; email: string };
 
 export function SignIn({ audience, children }: { audience: Audience; children?: ReactNode }) {
-  const { tx } = useLang();
+  const { lang, tx } = useLang();
   const { signIn } = useAuthActions();
   const methods = useQuery(api.team.methods);
   const flag = googleFlag(audience);
@@ -84,7 +87,7 @@ export function SignIn({ audience, children }: { audience: Audience; children?: 
     setError(null);
     flag.set();
     try {
-      await signIn('google', { redirectTo: client ? '/#portal' : '/#panel' });
+      await signIn('google', { redirectTo: toPath({ name: client ? 'portal' : 'panel' }, lang) });
     } catch {
       flag.take();
       setBusy(false);
@@ -221,7 +224,7 @@ export function SignIn({ audience, children }: { audience: Audience; children?: 
     <div className="pn-signin">
       <aside className="pn-signin-brand">
         <Topo className="pn-signin-topo" centers={topo} color="rgba(232,238,232,.16)" animate speed={0.5} />
-        <a href="#home" className="pn-signin-logo" aria-label={tx('Go to the website', 'Ir al sitio web')}><LogoLockup /></a>
+        <Link to={{ name: 'home' }} className="pn-signin-logo" aria-label={tx('Go to the website', 'Ir al sitio web')}><LogoLockup /></Link>
         <div className="pn-signin-copy">
           {client ? (
             <>

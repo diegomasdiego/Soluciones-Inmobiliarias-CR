@@ -1,133 +1,34 @@
-// Tiny hash router. Hashes are bare tokens (#search, #property-los-laureles) so deep links
-// also work inside the artifact viewer. Navigation uses the View Transitions API when available,
-// so a card photo can morph into the property page hero.
-import { createContext, useCallback, useContext, useEffect, useState, type AnchorHTMLAttributes, type ReactNode } from 'react';
-import { flushSync } from 'react-dom';
+'use client';
+// Routing for the views, on top of Next.js: views keep using routes ({ name: 'property', slug })
+// and this file turns them into real URLs in the current language (lib/routes.ts).
+import { useCallback, useMemo, type AnchorHTMLAttributes, type ReactNode } from 'react';
+import NextLink from 'next/link';
+import { usePathname, useRouter as useNextRouter } from 'next/navigation';
+import { useLang } from './i18n';
+import { fromPathname, toPath, type Route } from './routes';
 
-export type Route =
-  | { name: 'home' }
-  | { name: 'search' }
-  | { name: 'property'; slug: string }
-  | { name: 'calculator'; slug?: string }
-  | { name: 'build' }
-  | { name: 'contact'; topic?: string }
-  | { name: 'projects' }
-  | { name: 'project'; slug: string }
-  | { name: 'sell' }
-  | { name: 'about' }
-  /** Saved properties; `shared` holds the slugs of a list someone sent by link. */
-  | { name: 'saved'; shared?: string[] }
-  | { name: 'guides' }
-  | { name: 'guide'; slug: string }
-  | { name: 'panel' }
-  /** Client portal; `demo` shows it with fictitious data, without signing in. */
-  | { name: 'portal'; demo?: boolean };
+export { toPath, type Route } from './routes';
 
-export function parseHash(hash: string): Route {
-  const h = decodeURIComponent(hash.replace(/^#/, ''));
-  if (h === 'panel') return { name: 'panel' };
-  if (h === 'portal') return { name: 'portal' };
-  if (h === 'portal-demo') return { name: 'portal', demo: true };
-  if (h === 'projects') return { name: 'projects' };
-  if (h === 'sell') return { name: 'sell' };
-  if (h === 'about') return { name: 'about' };
-  if (h === 'saved') return { name: 'saved' };
-  if (h === 'guides') return { name: 'guides' };
-  if (h.startsWith('guide-')) return { name: 'guide', slug: h.slice(6) };
-  if (h.startsWith('compare-')) return { name: 'saved', shared: h.slice(8).split(',').filter(Boolean).slice(0, 12) };
-  if (h.startsWith('project-')) return { name: 'project', slug: h.slice(8) };
-  if (h === 'search') return { name: 'search' };
-  if (h.startsWith('property-')) return { name: 'property', slug: h.slice(9) };
-  if (h === 'calculator') return { name: 'calculator' };
-  if (h.startsWith('calculator-')) return { name: 'calculator', slug: h.slice(11) };
-  if (h === 'build') return { name: 'build' };
-  if (h === 'contact') return { name: 'contact' };
-  if (h.startsWith('contact-')) return { name: 'contact', topic: h.slice(8) };
-  return { name: 'home' };
-}
-
-export function toHash(r: Route): string {
-  switch (r.name) {
-    case 'home': return 'home';
-    case 'search': return 'search';
-    case 'property': return `property-${r.slug}`;
-    case 'calculator': return r.slug ? `calculator-${r.slug}` : 'calculator';
-    case 'build': return 'build';
-    case 'contact': return r.topic ? `contact-${r.topic}` : 'contact';
-    case 'projects': return 'projects';
-    case 'project': return `project-${r.slug}`;
-    case 'sell': return 'sell';
-    case 'about': return 'about';
-    case 'saved': return r.shared?.length ? `compare-${r.shared.join(',')}` : 'saved';
-    case 'guides': return 'guides';
-    case 'guide': return `guide-${r.slug}`;
-    case 'panel': return 'panel';
-    case 'portal': return r.demo ? 'portal-demo' : 'portal';
-  }
-}
-
-type NavOpts = { morph?: HTMLElement | null; keepScroll?: boolean };
-type Ctx = { route: Route; navigate: (to: Route, opts?: NavOpts) => void };
-const RouterCtx = createContext<Ctx | null>(null);
-
-const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-type VTDoc = Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
-
-export function RouterProvider({ children }: { children: ReactNode }) {
-  const [route, setRoute] = useState<Route>(() => parseHash(window.location.hash));
-
-  useEffect(() => {
-    const onPop = () => {
-      const next = parseHash(window.location.hash);
-      const apply = () => { flushSync(() => setRoute(next)); window.scrollTo(0, 0); };
-      const doc = document as VTDoc;
-      if (doc.startViewTransition && !reduceMotion()) doc.startViewTransition(apply); else apply();
-    };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, []);
-
-  const navigate = useCallback((to: Route, opts: NavOpts = {}) => {
-    try { history.pushState(null, '', '#' + toHash(to)); } catch { /* sandboxed frames may refuse history changes */ }
-    const apply = () => {
-      flushSync(() => setRoute(to));
-      if (!opts.keepScroll) window.scrollTo(0, 0);
-    };
-    const doc = document as VTDoc;
-    if (!doc.startViewTransition || reduceMotion()) { apply(); return; }
-    if (opts.morph) {
-      document.querySelectorAll('.vt-hero').forEach(el => el.classList.remove('vt-hero'));
-      opts.morph.style.viewTransitionName = 'hero-photo';
-    }
-    const vt = doc.startViewTransition(apply);
-    vt.finished.finally(() => { if (opts.morph) opts.morph.style.viewTransitionName = ''; });
-  }, []);
-
-  return <RouterCtx.Provider value={{ route, navigate }}>{children}</RouterCtx.Provider>;
-}
+type NavOpts = { keepScroll?: boolean };
 
 export function useRouter() {
-  const ctx = useContext(RouterCtx);
-  if (!ctx) throw new Error('useRouter outside RouterProvider');
-  return ctx;
+  const pathname = usePathname();
+  const next = useNextRouter();
+  const { lang } = useLang();
+  const route = useMemo<Route>(() => fromPathname(pathname ?? '/').route ?? { name: 'home' }, [pathname]);
+  const navigate = useCallback((to: Route, opts: NavOpts = {}) => {
+    next.push(toPath(to, lang), { scroll: !opts.keepScroll });
+  }, [next, lang]);
+  /** The absolute URL of a route, for sharing. */
+  const urlOf = useCallback((to: Route) => `${window.location.origin}${toPath(to, lang)}`, [lang]);
+  return { route, navigate, urlOf };
 }
 
 export function Link({ to, children, className, onClick, ...rest }: { to: Route; children: ReactNode; className?: string; onClick?: () => void } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'onClick'>) {
-  const { navigate } = useRouter();
+  const { lang } = useLang();
   return (
-    <a
-      href={'#' + toHash(to)}
-      className={className}
-      onClick={e => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-        e.preventDefault();
-        onClick?.();
-        navigate(to);
-      }}
-      {...rest}
-    >
+    <NextLink href={toPath(to, lang)} className={className} onClick={onClick} {...rest}>
       {children}
-    </a>
+    </NextLink>
   );
 }

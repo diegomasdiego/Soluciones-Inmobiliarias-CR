@@ -1,6 +1,8 @@
-// Data layer. With VITE_CONVEX_URL set, listings come live from Convex and form requests are saved there.
-// Without it (local preview, the published artifact) the site uses the bundled sample listings.
-// ConvexAuthProvider carries the team sign-in for the #panel page; visitors never sign in.
+'use client';
+// Data layer in the browser. The server draws each page with the listings it read from Convex
+// (lib/listings.ts) and hands them over as `initial`; here they stay live through a Convex
+// subscription. Without NEXT_PUBLIC_CONVEX_URL the site uses the bundled sample listings.
+// ConvexAuthProvider carries the sign-in for the team panel and the client portal.
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
 import { ConvexReactClient, useQuery } from 'convex/react';
@@ -8,7 +10,7 @@ import { api } from '../../convex/_generated/api';
 import type { AiSearchResult } from '../../convex/ai';
 import { properties as samples, type Property } from '../data/properties';
 
-const url = import.meta.env.VITE_CONVEX_URL as string | undefined;
+const url = process.env.NEXT_PUBLIC_CONVEX_URL;
 const convex = url ? new ConvexReactClient(url) : null;
 export const hasDatabase = convex !== null;
 /** Base URL of the deployment's HTTP routes (convex/http.ts), e.g. portal file downloads. */
@@ -25,26 +27,26 @@ function build(list: Property[], source: Data['source']): Data {
   return { properties: list, bySlug: slug => map.get(slug), source };
 }
 const sampleData = build(samples, 'sample');
-const loadingData = build(samples, 'loading');
 
 const DataCtx = createContext<Data>(sampleData);
 
-function LiveData({ children }: { children: ReactNode }) {
+function LiveData({ initial, children }: { initial: Data; children: ReactNode }) {
   const remote = useQuery(api.properties.list) as Property[] | undefined;
   const value = useMemo(() => {
-    if (remote === undefined) return loadingData;
+    if (remote === undefined) return initial;
     return remote.length ? build(remote, 'database') : sampleData;
-  }, [remote]);
+  }, [remote, initial]);
   // Visible in dev tools as <html data-listings="database">, handy to confirm where listings come from.
   useEffect(() => { document.documentElement.dataset.listings = value.source; }, [value.source]);
   return <DataCtx.Provider value={value}>{children}</DataCtx.Provider>;
 }
 
-export function DataProvider({ children }: { children: ReactNode }) {
-  if (!convex) return <DataCtx.Provider value={sampleData}>{children}</DataCtx.Provider>;
+export function DataProvider({ initial, children }: { initial?: { properties: Property[]; source: 'sample' | 'database' }; children: ReactNode }) {
+  const first = useMemo(() => (initial ? build(initial.properties, initial.source) : sampleData), [initial]);
+  if (!convex) return <DataCtx.Provider value={first}>{children}</DataCtx.Provider>;
   return (
     <ConvexAuthProvider client={convex}>
-      <LiveData>{children}</LiveData>
+      <LiveData initial={first}>{children}</LiveData>
     </ConvexAuthProvider>
   );
 }

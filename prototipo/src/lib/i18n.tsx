@@ -1,30 +1,28 @@
-// English / Spanish. UI strings are written inline as tx('English', 'Español') so each pair
-// stays next to where it is used; data files use L = { en, es }.
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+'use client';
+// English / Spanish in the browser. The language comes from the URL (/es/... is Spanish); switching
+// it goes to the same page in the other language and remembers the choice in a cookie.
+// Server code imports the plain helpers from ./lang instead.
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { LANG_COOKIE, type Lang } from './lang';
+import { fromPathname, toPath } from './routes';
 
-export type Lang = 'en' | 'es';
-export type L = { en: string; es: string };
-export const pick = (v: L | string, lang: Lang) => (typeof v === 'string' ? v : v[lang]);
+export { pick, type L, type Lang } from './lang';
 
 type Ctx = { lang: Lang; setLang: (l: Lang) => void; tx: (en: string, es: string) => string };
 const LangCtx = createContext<Ctx | null>(null);
 
-function initialLang(): Lang {
-  try {
-    const saved = localStorage.getItem('sicr.lang');
-    if (saved === 'en' || saved === 'es') return saved;
-  } catch { /* storage unavailable */ }
-  return navigator.language?.toLowerCase().startsWith('es') ? 'es' : 'en';
-}
-
-export function LangProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(initialLang);
-  useEffect(() => {
-    document.documentElement.lang = lang === 'es' ? 'es-CR' : 'en';
-    try { localStorage.setItem('sicr.lang', lang); } catch { /* storage unavailable */ }
-  }, [lang]);
+export function LangProvider({ lang, children }: { lang: Lang; children: ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const setLang = useCallback((next: Lang) => {
+    if (next === lang) return;
+    document.cookie = `${LANG_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
+    const { route } = fromPathname(pathname ?? '/');
+    router.push(toPath(route ?? { name: 'home' }, next) + window.location.search, { scroll: false });
+  }, [lang, pathname, router]);
   const tx = useCallback((en: string, es: string) => (lang === 'es' ? es : en), [lang]);
-  const value = useMemo(() => ({ lang, setLang: setLangState, tx }), [lang, tx]);
+  const value = useMemo(() => ({ lang, setLang, tx }), [lang, setLang, tx]);
   return <LangCtx.Provider value={value}>{children}</LangCtx.Provider>;
 }
 

@@ -1,3 +1,4 @@
+'use client';
 // The client's logo (vectorized from logo.JPG) recolored with the site palette.
 // LogoLockup: building + the three lines of lettering side by side, for the header (uses currentColor).
 // LogoBadge: the full circular emblem, for the footer and brand surfaces.

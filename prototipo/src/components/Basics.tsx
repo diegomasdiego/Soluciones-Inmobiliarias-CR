@@ -1,3 +1,4 @@
+'use client';
 import { useEffect, useRef, useState, type CSSProperties, type ImgHTMLAttributes, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { getMedia } from '../lib/media';

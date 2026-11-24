@@ -1,3 +1,4 @@
+'use client';
 // Shared pieces for the buyer guides: rich text, guide icons and the guide card.
 import { Fragment, type ReactNode } from 'react';
 import type { Guide, GuideIcon } from '../data/guides';

@@ -1,3 +1,4 @@
+'use client';
 // A deal from Convex with its actions, for the client portal and the team panel.
 // Files go up through a one-time upload URL and come down through convex/http.ts with the
 // session token, so they never have a public link.

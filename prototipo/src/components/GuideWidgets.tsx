@@ -1,3 +1,4 @@
+'use client';
 // Interactive pieces used inside the buyer guides: purchase timeline, maritime-zone cross-section,
 // investor-residency check and yearly ownership taxes.
 import { useState } from 'react';
